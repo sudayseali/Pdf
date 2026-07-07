@@ -9,7 +9,7 @@ interface ReaderScreenProps {
 }
 
 export function ReaderScreen({ pdfId }: ReaderScreenProps) {
-  const [fileData, setFileData] = useState<ArrayBuffer | null>(null);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<PdfMetadata | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [zoom, setZoom] = useState(1);
@@ -17,6 +17,12 @@ export function ReaderScreen({ pdfId }: ReaderScreenProps) {
 
   useEffect(() => {
     loadPdf();
+    return () => {
+      // Cleanup Object URL on unmount
+      if (fileUrl) {
+        URL.revokeObjectURL(fileUrl);
+      }
+    };
   }, [pdfId]);
 
   const loadPdf = async () => {
@@ -25,7 +31,10 @@ export function ReaderScreen({ pdfId }: ReaderScreenProps) {
       const data = await storage.getPdfData(pdfId);
       const meta = await storage.getPdfMetadata(pdfId);
       
-      setFileData(data);
+      if (data) {
+        const blob = new Blob([data], { type: 'application/pdf' });
+        setFileUrl(URL.createObjectURL(blob));
+      }
       setMetadata(meta);
       
       // Update the recently viewed timestamp
@@ -89,7 +98,7 @@ export function ReaderScreen({ pdfId }: ReaderScreenProps) {
     );
   }
 
-  if (!fileData || !metadata) {
+  if (!fileUrl || !metadata) {
     return (
       <div className="flex-1 flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-500">
         Document not found.
@@ -100,7 +109,7 @@ export function ReaderScreen({ pdfId }: ReaderScreenProps) {
   return (
     <div className="flex-1 flex flex-col overflow-hidden relative">
       <PdfViewer 
-        fileData={fileData}
+        fileData={fileUrl}
         currentPage={metadata.lastPage}
         zoom={zoom}
         onLoadSuccess={handleLoadSuccess}

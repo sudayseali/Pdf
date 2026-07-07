@@ -10,7 +10,7 @@ import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?worker&url';
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
 interface PdfViewerProps {
-  fileData: ArrayBuffer | null;
+  fileData: string | null;
   currentPage: number;
   zoom: number;
   onLoadSuccess: (numPages: number) => void;
@@ -19,6 +19,7 @@ interface PdfViewerProps {
 export const PdfViewer = memo(function PdfViewer({ fileData, currentPage, zoom, onLoadSuccess }: PdfViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(window.innerWidth);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const documentOptions = useMemo(() => ({
     cMapUrl: 'https://unpkg.com/pdfjs-dist@5.4.296/cmaps/',
@@ -48,11 +49,14 @@ export const PdfViewer = memo(function PdfViewer({ fileData, currentPage, zoom, 
         file={fileData}
         options={documentOptions}
         onLoadSuccess={({ numPages }) => onLoadSuccess(numPages)}
+        onLoadError={(error) => setErrorMessage(error.message)}
         loading={
           <div className="w-full max-w-lg aspect-[1/1.4] bg-white dark:bg-slate-800 animate-pulse rounded shadow-2xl" />
         }
         error={
-          <div className="text-red-500 text-center p-4">Failed to load PDF.</div>
+          <div className="text-red-500 text-center p-4">
+            Failed to load PDF. {errorMessage ? `Error: ${errorMessage}` : ''}
+          </div>
         }
       >
         <Page
