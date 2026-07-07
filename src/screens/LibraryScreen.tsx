@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FileText, Trash2, Clock, HardDrive, Search, X } from 'lucide-react';
+import { FileText, Trash2, Clock, HardDrive, Search, X, Lock, Unlock } from 'lucide-react';
 import { storage } from '../lib/storage';
 import { PdfDocument } from '../types';
 
 interface LibraryScreenProps {
-  onOpenPdf: (id: string) => void;
+  onOpenPdf: (id: string, isSensitive: boolean) => void;
 }
 
 interface LibraryDocument extends PdfDocument {
@@ -49,6 +49,12 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
       await storage.deletePdf(id);
       loadLibrary();
     }
+  };
+
+  const handleToggleSensitive = async (e: React.MouseEvent, id: string, isSensitive: boolean) => {
+    e.stopPropagation();
+    await storage.toggleSensitive(id, !isSensitive);
+    loadLibrary();
   };
 
   const formatSize = (bytes: number) => {
@@ -126,11 +132,11 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
               filteredDocuments.map((doc) => (
                 <div 
                   key={doc.id}
-                  onClick={() => onOpenPdf(doc.id)}
+                  onClick={() => onOpenPdf(doc.id, !!doc.isSensitive)}
                   className="bg-white dark:bg-slate-800/80 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4 cursor-pointer hover:border-blue-400 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors active:scale-[0.99]"
                 >
-                  <div className="w-10 h-10 shrink-0 bg-blue-600 text-white rounded-md flex items-center justify-center shadow-sm">
-                    <FileText className="w-5 h-5" />
+                  <div className={`w-10 h-10 shrink-0 ${doc.isSensitive ? 'bg-amber-500' : 'bg-blue-600'} text-white rounded-md flex items-center justify-center shadow-sm`}>
+                    {doc.isSensitive ? <Lock className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-medium text-slate-900 dark:text-slate-200 truncate">
@@ -155,12 +161,23 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
                       </div>
                     ) : null}
                   </div>
-                  <button 
-                    onClick={(e) => handleDelete(e, doc.id)}
-                    className="p-2 -mr-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  
+                  <div className="flex items-center gap-1">
+                    <button 
+                      onClick={(e) => handleToggleSensitive(e, doc.id, !!doc.isSensitive)}
+                      className={`p-2 rounded-full transition-colors ${doc.isSensitive ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30' : 'text-slate-400 hover:text-amber-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                      title={doc.isSensitive ? 'Remove protection' : 'Protect document'}
+                    >
+                      {doc.isSensitive ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                    </button>
+                    <button 
+                      onClick={(e) => handleDelete(e, doc.id)}
+                      className="p-2 -mr-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors"
+                      title="Delete document"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))
             )}

@@ -4,6 +4,7 @@ export interface PdfDocument {
   size: number;
   addedAt: number;
   lastOpenedAt?: number;
+  isSensitive?: boolean;
 }
 
 export interface PdfMetadata {

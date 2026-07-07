@@ -4,7 +4,7 @@ import { storage } from '../lib/storage';
 import { PdfDocument } from '../types';
 
 interface HomeScreenProps {
-  onNavigate: (screen: 'Library' | 'Reader', pdfId?: string) => void;
+  onNavigate: (screen: 'Library' | 'Reader', pdfId?: string, isSensitive?: boolean) => void;
 }
 
 export function HomeScreen({ onNavigate }: HomeScreenProps) {
@@ -91,11 +91,11 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
               {recentDocs.map(doc => (
                 <div 
                   key={doc.id}
-                  onClick={() => onNavigate('Reader', doc.id)}
+                  onClick={() => onNavigate('Reader', doc.id, !!doc.isSensitive)}
                   className="bg-white dark:bg-slate-800/80 p-3 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-3 cursor-pointer hover:border-blue-400 dark:hover:border-slate-600 transition-colors"
                 >
-                  <div className="w-8 h-8 shrink-0 bg-blue-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded flex items-center justify-center">
-                    <Clock className="w-4 h-4" />
+                  <div className={`w-8 h-8 shrink-0 ${doc.isSensitive ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' : 'bg-blue-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400'} rounded flex items-center justify-center`}>
+                    {doc.isSensitive ? <Lock className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-slate-900 dark:text-slate-200 truncate">{doc.name}</p>

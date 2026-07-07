@@ -42,6 +42,15 @@ export const storage = {
     }
   },
 
+  async toggleSensitive(id: string, isSensitive: boolean) {
+    const library = await this.getLibrary();
+    const docIndex = library.findIndex(d => d.id === id);
+    if (docIndex !== -1) {
+      library[docIndex].isSensitive = isSensitive;
+      await libraryStore.setItem('documents', library);
+    }
+  },
+
   async getLibrary(): Promise<PdfDocument[]> {
     const docs = await libraryStore.getItem<PdfDocument[]>('documents');
     return docs || [];
@@ -85,5 +94,17 @@ export const storage = {
 
   async setAutoDarkMode(isAuto: boolean) {
     await settingsStore.setItem('autoDarkMode', isAuto);
+  },
+
+  async getPin(): Promise<string | null> {
+    return await settingsStore.getItem<string>('app_pin');
+  },
+
+  async setPin(pin: string | null) {
+    if (pin) {
+      await settingsStore.setItem('app_pin', pin);
+    } else {
+      await settingsStore.removeItem('app_pin');
+    }
   }
 };
