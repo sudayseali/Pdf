@@ -48,8 +48,8 @@ jobs:
           echo "Fixing gradle wrapper..."
           mkdir -p temp-gradle
           cd temp-gradle
-          gradle wrapper --gradle-version 8.7
-          cp gradle/wrapper/gradle-wrapper.jar ../android/gradle/wrapper/
+          gradle wrapper --gradle-version 8.2.1
+          cp -a gradle/wrapper/* ../android/gradle/wrapper/
           cd ../android
           chmod +x gradlew
           echo "Building debug APK."
