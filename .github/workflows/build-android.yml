@@ -47,6 +47,7 @@ jobs:
         working-directory: android
         run: |
           echo "Building debug APK."
+          gradle wrapper
           chmod +x gradlew
           ./gradlew assembleDebug
 
