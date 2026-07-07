@@ -39,35 +39,14 @@ jobs:
       - name: Expo Prebuild (Generate Android Project)
         run: npx expo prebuild --platform android --clean
 
-      # If you have Keystore details securely added to GitHub Secrets, this step will decode it.
-      - name: Decode Keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: |
-          if [ -n "$KEYSTORE_BASE64" ]; then
-            echo $KEYSTORE_BASE64 | base64 --decode > android/app/my-release-key.keystore
-          fi
-
-      - name: Build APK (Release)
+      - name: Build APK
         working-directory: android
-        env:
-          MYAPP_RELEASE_STORE_FILE: my-release-key.keystore
-          MYAPP_RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          MYAPP_RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          MYAPP_RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          if [ -f "app/my-release-key.keystore" ]; then
-            echo "Keystore found! Building signed release APK."
-            ./gradlew assembleRelease
-          else
-            echo "Keystore not found. Building debug APK instead."
-            ./gradlew assembleDebug
-          fi
+          echo "Building debug APK."
+          ./gradlew assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-apk
-          path: |
-            android/app/build/outputs/apk/release/*.apk
-            android/app/build/outputs/apk/debug/*.apk
+          path: android/app/build/outputs/apk/debug/*.apk

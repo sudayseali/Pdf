@@ -27,6 +27,9 @@ export function ReaderScreen({ pdfId }: ReaderScreenProps) {
       
       setFileData(data);
       setMetadata(meta);
+      
+      // Update the recently viewed timestamp
+      await storage.updateLastOpened(pdfId);
     } catch (error) {
       console.error('Error loading PDF:', error);
       alert('Failed to load this document.');

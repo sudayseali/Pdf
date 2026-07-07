@@ -12,16 +12,40 @@ export default function App() {
     currentScreen: 'Home',
     selectedPdfId: null,
     darkMode: false,
+    autoDarkMode: true,
   });
 
   const [currentPdfName, setCurrentPdfName] = useState<string>('');
 
   useEffect(() => {
     // Load dark mode preference on boot
-    storage.getDarkMode().then(mode => {
-      setState(s => ({ ...s, darkMode: mode }));
+    Promise.all([storage.getDarkMode(), storage.getAutoDarkMode()]).then(([mode, auto]) => {
+      setState(s => ({ ...s, darkMode: mode, autoDarkMode: auto }));
     });
   }, []);
+
+  useEffect(() => {
+    if (!state.autoDarkMode) return;
+
+    const checkTimeForDarkMode = () => {
+      const currentHour = new Date().getHours();
+      // Assume sunset is 18:00 and sunrise is 06:00
+      const isNightTime = currentHour >= 18 || currentHour < 6;
+      
+      setState(s => {
+        if (!s.autoDarkMode) return s;
+        if (s.darkMode !== isNightTime) {
+          storage.setDarkMode(isNightTime);
+          return { ...s, darkMode: isNightTime };
+        }
+        return s;
+      });
+    };
+
+    checkTimeForDarkMode();
+    const intervalId = setInterval(checkTimeForDarkMode, 60000);
+    return () => clearInterval(intervalId);
+  }, [state.autoDarkMode]);
 
   // Update HTML class for Tailwind dark mode
   useEffect(() => {
@@ -34,8 +58,15 @@ export default function App() {
 
   const toggleDarkMode = () => {
     const newMode = !state.darkMode;
-    setState(s => ({ ...s, darkMode: newMode }));
+    setState(s => ({ ...s, darkMode: newMode, autoDarkMode: false }));
     storage.setDarkMode(newMode);
+    storage.setAutoDarkMode(false);
+  };
+
+  const toggleAutoDarkMode = () => {
+    const newAuto = !state.autoDarkMode;
+    setState(s => ({ ...s, autoDarkMode: newAuto }));
+    storage.setAutoDarkMode(newAuto);
   };
 
   const handleNavigate = (screen: Screen, pdfId?: string) => {
@@ -74,6 +105,8 @@ export default function App() {
         onBack={handleBack}
         darkMode={state.darkMode}
         toggleDarkMode={toggleDarkMode}
+        autoDarkMode={state.autoDarkMode}
+        toggleAutoDarkMode={toggleAutoDarkMode}
       />
       
       <main className="flex-1 flex flex-col relative overflow-hidden">

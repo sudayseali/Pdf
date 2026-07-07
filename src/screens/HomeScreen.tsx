@@ -1,6 +1,7 @@
-import { useState, useRef, ChangeEvent } from 'react';
-import { FileUp, Library, FileText, Lock } from 'lucide-react';
+import { useState, useRef, ChangeEvent, useEffect } from 'react';
+import { FileUp, Library, FileText, Lock, Clock } from 'lucide-react';
 import { storage } from '../lib/storage';
+import { PdfDocument } from '../types';
 
 interface HomeScreenProps {
   onNavigate: (screen: 'Library' | 'Reader', pdfId?: string) => void;
@@ -8,7 +9,15 @@ interface HomeScreenProps {
 
 export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const [isImporting, setIsImporting] = useState(false);
+  const [recentDocs, setRecentDocs] = useState<PdfDocument[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    storage.getLibrary().then(docs => {
+      const sorted = [...docs].sort((a, b) => (b.lastOpenedAt || b.addedAt) - (a.lastOpenedAt || a.addedAt));
+      setRecentDocs(sorted.slice(0, 3));
+    });
+  }, []);
 
   const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -75,7 +84,32 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           </button>
         </div>
 
-        <div className="flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest font-bold text-slate-400 dark:text-slate-500">
+        {recentDocs.length > 0 && (
+          <div className="w-full pt-4">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Recently Viewed</h3>
+            <div className="space-y-2">
+              {recentDocs.map(doc => (
+                <div 
+                  key={doc.id}
+                  onClick={() => onNavigate('Reader', doc.id)}
+                  className="bg-white dark:bg-slate-800/80 p-3 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-3 cursor-pointer hover:border-blue-400 dark:hover:border-slate-600 transition-colors"
+                >
+                  <div className="w-8 h-8 shrink-0 bg-blue-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded flex items-center justify-center">
+                    <Clock className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-900 dark:text-slate-200 truncate">{doc.name}</p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                      {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(doc.lastOpenedAt || doc.addedAt))}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest font-bold text-slate-400 dark:text-slate-500 pt-4">
           <Lock className="w-3 h-3" />
           <span>Files stay on your device</span>
         </div>

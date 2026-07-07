@@ -20,6 +20,7 @@ export const storage = {
       name: file.name,
       size: file.size,
       addedAt: Date.now(),
+      lastOpenedAt: Date.now(),
     };
     
     const library = await this.getLibrary();
@@ -30,6 +31,15 @@ export const storage = {
     await metaStore.setItem(id, { lastPage: 1, bookmarks: [] });
     
     return doc;
+  },
+
+  async updateLastOpened(id: string) {
+    const library = await this.getLibrary();
+    const docIndex = library.findIndex(d => d.id === id);
+    if (docIndex !== -1) {
+      library[docIndex].lastOpenedAt = Date.now();
+      await libraryStore.setItem('documents', library);
+    }
   },
 
   async getLibrary(): Promise<PdfDocument[]> {
@@ -66,5 +76,14 @@ export const storage = {
 
   async setDarkMode(isDark: boolean) {
     await settingsStore.setItem('darkMode', isDark);
+  },
+
+  async getAutoDarkMode(): Promise<boolean> {
+    const auto = await settingsStore.getItem<boolean>('autoDarkMode');
+    return auto ?? true;
+  },
+
+  async setAutoDarkMode(isAuto: boolean) {
+    await settingsStore.setItem('autoDarkMode', isAuto);
   }
 };

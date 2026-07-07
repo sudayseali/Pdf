@@ -3,6 +3,7 @@ export interface PdfDocument {
   name: string;
   size: number;
   addedAt: number;
+  lastOpenedAt?: number;
 }
 
 export interface PdfMetadata {
@@ -17,4 +18,5 @@ export interface AppState {
   currentScreen: Screen;
   selectedPdfId: string | null;
   darkMode: boolean;
+  autoDarkMode?: boolean;
 }

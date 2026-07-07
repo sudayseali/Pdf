@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Moon, Sun, Search, MoreVertical } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Search, MoreVertical, Clock } from 'lucide-react';
 
 interface HeaderProps {
   title: string;
@@ -7,6 +7,8 @@ interface HeaderProps {
   onBack?: () => void;
   darkMode: boolean;
   toggleDarkMode: () => void;
+  autoDarkMode?: boolean;
+  toggleAutoDarkMode?: () => void;
   rightAction?: React.ReactNode;
 }
 
@@ -34,9 +36,24 @@ export function Header({ title, showBack, onBack, darkMode, toggleDarkMode, righ
       </div>
       
       <div className="flex items-center gap-3 border-l border-slate-200 dark:border-slate-700 pl-4 shrink-0">
+        {toggleAutoDarkMode && (
+          <button 
+            onClick={toggleAutoDarkMode}
+            className={`p-2 rounded-full transition-colors active:scale-95 ${
+              autoDarkMode 
+                ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' 
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+            title={autoDarkMode ? "Auto Dark Mode: ON" : "Auto Dark Mode: OFF"}
+            aria-label="Toggle auto dark mode"
+          >
+            <Clock className="w-5 h-5" />
+          </button>
+        )}
         <button 
           onClick={toggleDarkMode}
           className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors active:scale-95"
+          title="Toggle dark mode"
           aria-label="Toggle dark mode"
         >
           {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
