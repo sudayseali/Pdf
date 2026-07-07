@@ -1,0 +1,71 @@
+import { useState, useEffect, useRef, memo, useMemo } from 'react';
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
+
+// Initialize PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
+
+interface PdfViewerProps {
+  fileData: ArrayBuffer | null;
+  currentPage: number;
+  zoom: number;
+  onLoadSuccess: (numPages: number) => void;
+}
+
+export const PdfViewer = memo(function PdfViewer({ fileData, currentPage, zoom, onLoadSuccess }: PdfViewerProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState<number>(window.innerWidth);
+
+  const documentOptions = useMemo(() => ({
+    cMapUrl: 'https://unpkg.com/pdfjs-dist@5.4.296/cmaps/',
+    cMapPacked: true,
+  }), []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.clientWidth);
+      }
+    };
+    
+    handleResize(); // Initial
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (!fileData) return null;
+
+  return (
+    <div 
+      ref={containerRef}
+      className="flex-1 overflow-auto bg-slate-100 dark:bg-slate-950 flex flex-col items-center p-8 transition-colors"
+    >
+      <Document
+        file={fileData}
+        options={documentOptions}
+        onLoadSuccess={({ numPages }) => onLoadSuccess(numPages)}
+        loading={
+          <div className="w-full max-w-lg aspect-[1/1.4] bg-white dark:bg-slate-800 animate-pulse rounded shadow-2xl" />
+        }
+        error={
+          <div className="text-red-500 text-center p-4">Failed to load PDF.</div>
+        }
+      >
+        <Page
+          pageNumber={currentPage}
+          width={Math.min(containerWidth - 64, 800) * zoom}
+          className="shadow-2xl bg-white rounded overflow-hidden transition-all duration-200 transform origin-top"
+          renderTextLayer={true}
+          renderAnnotationLayer={true}
+          loading={
+             <div className="w-full max-w-lg aspect-[1/1.4] bg-slate-100 dark:bg-slate-800 animate-pulse rounded shadow-2xl" />
+          }
+        />
+      </Document>
+    </div>
+  );
+});
