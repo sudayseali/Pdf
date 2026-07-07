@@ -43,19 +43,16 @@ jobs:
             npx cap add android
           fi
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
       - name: Build APK
+        working-directory: android
         run: |
-          echo "Fixing gradle wrapper..."
-          mkdir -p temp-gradle
-          cd temp-gradle
-          gradle wrapper --gradle-version 8.14.3
-          cp -a gradle/wrapper/* ../android/gradle/wrapper/
-          cp -a gradlew ../android/
-          cp -a gradlew.bat ../android/
-          cd ../android
-          chmod +x gradlew
           echo "Building debug APK."
-          ./gradlew assembleDebug
+          gradle assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
