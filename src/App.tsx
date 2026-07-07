@@ -21,6 +21,7 @@ export default function App() {
   const [securityModalOpen, setSecurityModalOpen] = useState(false);
   const [securityModalMode, setSecurityModalMode] = useState<'verify' | 'manage'>('manage');
   const [pendingPdfId, setPendingPdfId] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     // Load dark mode preference on boot
@@ -107,6 +108,17 @@ export default function App() {
     }
   };
 
+  const handleSessionEnd = (durationSeconds: number) => {
+    const minutes = Math.floor(durationSeconds / 60);
+    const seconds = durationSeconds % 60;
+    const timeStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+    setToastMessage(`Reading session ended: ${timeStr} spent.`);
+    
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
+
   const getHeaderTitle = () => {
     switch (state.currentScreen) {
       case 'Home': return 'PDF Reader';
@@ -162,7 +174,7 @@ export default function App() {
         )}
         
         {state.currentScreen === 'Reader' && state.selectedPdfId && (
-          <ReaderScreen pdfId={state.selectedPdfId} />
+          <ReaderScreen pdfId={state.selectedPdfId} onSessionEnd={handleSessionEnd} />
         )}
       </main>
 
@@ -175,6 +187,12 @@ export default function App() {
         mode={securityModalMode}
         onVerifySuccess={handleVerifySuccess}
       />
+
+      {toastMessage && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-800 dark:bg-slate-700 text-white px-4 py-2 rounded-full shadow-xl z-50 text-sm font-medium animate-in fade-in slide-in-from-bottom-4 duration-300">
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 }

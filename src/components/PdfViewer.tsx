@@ -10,7 +10,7 @@ import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?worker&url';
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
 interface PdfViewerProps {
-  fileData: string | null;
+  fileData: ArrayBuffer | null;
   currentPage: number;
   zoom: number;
   onLoadSuccess: (numPages: number) => void;
@@ -26,6 +26,11 @@ export const PdfViewer = memo(function PdfViewer({ fileData, currentPage, zoom, 
     cMapPacked: true,
   }), []);
 
+  const fileConfig = useMemo(() => {
+    if (!fileData) return null;
+    return { data: new Uint8Array(fileData) };
+  }, [fileData]);
+
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
@@ -38,7 +43,7 @@ export const PdfViewer = memo(function PdfViewer({ fileData, currentPage, zoom, 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  if (!fileData) return null;
+  if (!fileConfig) return null;
 
   return (
     <div 
@@ -46,7 +51,7 @@ export const PdfViewer = memo(function PdfViewer({ fileData, currentPage, zoom, 
       className="flex-1 overflow-auto bg-slate-100 dark:bg-slate-950 flex flex-col items-center p-8 transition-colors"
     >
       <Document
-        file={fileData}
+        file={fileConfig}
         options={documentOptions}
         onLoadSuccess={({ numPages }) => onLoadSuccess(numPages)}
         onLoadError={(error) => setErrorMessage(error.message)}

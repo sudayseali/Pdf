@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { PdfViewer } from '../components/PdfViewer';
 import { BottomControls } from '../components/BottomControls';
 import { storage } from '../lib/storage';
@@ -6,21 +6,25 @@ import { PdfMetadata } from '../types';
 
 interface ReaderScreenProps {
   pdfId: string;
+  onSessionEnd?: (durationSeconds: number) => void;
 }
 
-export function ReaderScreen({ pdfId }: ReaderScreenProps) {
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
+export function ReaderScreen({ pdfId, onSessionEnd }: ReaderScreenProps) {
+  const [fileData, setFileData] = useState<ArrayBuffer | null>(null);
   const [metadata, setMetadata] = useState<PdfMetadata | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [zoom, setZoom] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const sessionStartTime = useRef<number>(Date.now());
 
   useEffect(() => {
+    sessionStartTime.current = Date.now();
     loadPdf();
     return () => {
-      // Cleanup Object URL on unmount
-      if (fileUrl) {
-        URL.revokeObjectURL(fileUrl);
+      // Calculate session duration on unmount
+      const duration = Math.round((Date.now() - sessionStartTime.current) / 1000);
+      if (onSessionEnd && duration > 0) {
+        onSessionEnd(duration);
       }
     };
   }, [pdfId]);
@@ -31,10 +35,7 @@ export function ReaderScreen({ pdfId }: ReaderScreenProps) {
       const data = await storage.getPdfData(pdfId);
       const meta = await storage.getPdfMetadata(pdfId);
       
-      if (data) {
-        const blob = new Blob([data], { type: 'application/pdf' });
-        setFileUrl(URL.createObjectURL(blob));
-      }
+      setFileData(data);
       setMetadata(meta);
       
       // Update the recently viewed timestamp
@@ -98,7 +99,7 @@ export function ReaderScreen({ pdfId }: ReaderScreenProps) {
     );
   }
 
-  if (!fileUrl || !metadata) {
+  if (!fileData || !metadata) {
     return (
       <div className="flex-1 flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-500">
         Document not found.
@@ -109,7 +110,7 @@ export function ReaderScreen({ pdfId }: ReaderScreenProps) {
   return (
     <div className="flex-1 flex flex-col overflow-hidden relative">
       <PdfViewer 
-        fileData={fileUrl}
+        fileData={fileData}
         currentPage={metadata.lastPage}
         zoom={zoom}
         onLoadSuccess={handleLoadSuccess}
