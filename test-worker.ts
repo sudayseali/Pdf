@@ -1,3 +1,2 @@
-import PdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?worker';
-const w = new PdfWorker();
-console.log(w);
+import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?worker&url';
+console.log(workerUrl);

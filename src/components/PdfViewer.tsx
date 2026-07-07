@@ -3,10 +3,11 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
-// Initialize PDF.js worker using Vite's ?worker suffix.
-// This bundles the worker as a standard .js file, avoiding the .mjs MIME type issue on Android Capacitor.
-import PdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?worker';
-pdfjs.GlobalWorkerOptions.workerPort = new PdfWorker();
+// Initialize PDF.js worker using Vite's ?worker&url suffix.
+// This bundles the worker as a standard .js file, avoiding the .mjs MIME type issue on Android Capacitor,
+// while correctly providing a URL string to workerSrc.
+import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?worker&url';
+pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
 interface PdfViewerProps {
   fileData: ArrayBuffer | null;
