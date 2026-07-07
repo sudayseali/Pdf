@@ -12,7 +12,7 @@ interface HeaderProps {
   rightAction?: React.ReactNode;
 }
 
-export function Header({ title, showBack, onBack, darkMode, toggleDarkMode, rightAction }: HeaderProps) {
+export function Header({ title, showBack, onBack, darkMode, toggleDarkMode, autoDarkMode, toggleAutoDarkMode, rightAction }: HeaderProps) {
   return (
     <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 shrink-0 shadow-sm dark:shadow-lg transition-colors z-10">
       <div className="flex items-center gap-4 overflow-hidden">
