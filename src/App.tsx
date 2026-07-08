@@ -8,6 +8,7 @@ import { SettingsModal } from './components/SettingsModal';
 import { storage } from './lib/storage';
 import { Screen, AppState } from './types';
 import { Settings, Lock } from 'lucide-react';
+import { AppLogo } from './components/AppLogo';
 
 export default function App() {
   const [state, setState] = useState<AppState>({
@@ -167,9 +168,23 @@ export default function App() {
   };
   
   if (isLoadingAuth) {
-    return <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
-      <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
-    </div>;
+    return (
+      <div className="h-screen w-full bg-[#0f172a] flex flex-col items-center justify-center overflow-hidden">
+        <div className="flex flex-col items-center justify-center text-center space-y-6">
+          <div className="animate-bounce duration-1000">
+            <AppLogo size={120} className="shadow-2xl shadow-blue-500/20" />
+          </div>
+          <div className="space-y-1">
+            <h1 className="text-2xl font-black tracking-tight text-white">LexiView PDF</h1>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Pro Document Reader</p>
+          </div>
+        </div>
+        <div className="absolute bottom-16 flex flex-col items-center gap-2.5">
+          <div className="animate-spin w-5 h-5 border-2 border-cyan-500 border-t-transparent rounded-full" />
+          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500">Securing Workspace</span>
+        </div>
+      </div>
+    );
   }
 
   // If the app is locked, render ONLY the lock screen background and the modal
@@ -177,8 +192,8 @@ export default function App() {
     return (
       <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-300 dark:text-slate-800 pointer-events-none">
-          <Lock className="w-32 h-32 opacity-20 mb-4" />
-          <p className="text-2xl font-bold opacity-30 tracking-widest uppercase">LexiView PDF</p>
+          <AppLogo size={120} className="opacity-15 mb-4 grayscale" />
+          <p className="text-lg font-bold opacity-30 tracking-widest uppercase">LexiView PDF Locked</p>
         </div>
         <SettingsModal 
           isOpen={settingsModalOpen}

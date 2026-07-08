@@ -1,7 +1,8 @@
 import { useState, useRef, ChangeEvent, useEffect } from 'react';
-import { FileUp, Library, FileText, Lock, Clock, Edit3 } from 'lucide-react';
+import { FileUp, Library, Lock, Clock, Edit3 } from 'lucide-react';
 import { storage } from '../lib/storage';
 import { PdfDocument, Screen } from '../types';
+import { AppLogo } from '../components/AppLogo';
 
 interface HomeScreenProps {
   onNavigate: (screen: Screen, pdfId?: string, isSensitive?: boolean) => void;
@@ -47,9 +48,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         
         {/* Logo / Header Area */}
         <div className="text-center space-y-4">
-          <div className="w-24 h-24 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center shadow-lg">
-            <FileText className="w-12 h-12 text-white" />
-          </div>
+          <AppLogo size={96} className="mx-auto" />
           <div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white">LexiView PDF</h2>
             <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mt-2">Pro Document Reader</p>
