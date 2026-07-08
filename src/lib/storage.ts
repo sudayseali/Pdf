@@ -6,6 +6,8 @@ const pdfStore = localforage.createInstance({ name: 'pdf_data', storeName: 'blob
 const metaStore = localforage.createInstance({ name: 'pdf_meta', storeName: 'metadata' });
 const libraryStore = localforage.createInstance({ name: 'pdf_library', storeName: 'index' });
 const settingsStore = localforage.createInstance({ name: 'app_settings', storeName: 'prefs' });
+const drawingStore = localforage.createInstance({ name: 'pdf_drawings', storeName: 'drawings' });
+const audioStore = localforage.createInstance({ name: 'pdf_audio_memos', storeName: 'memos' });
 
 export const storage = {
   // --- Library & File Management ---
@@ -124,5 +126,43 @@ export const storage = {
     } else {
       await settingsStore.removeItem('app_pin');
     }
+  },
+
+  // --- Drawings & Ink Annotations ---
+  async getPageDrawings(pdfId: string, pageNumber: number): Promise<any[]> {
+    const drawings = await drawingStore.getItem<any[]>(`drawings_${pdfId}_${pageNumber}`);
+    return drawings || [];
+  },
+
+  async savePageDrawings(pdfId: string, pageNumber: number, strokes: any[]) {
+    await drawingStore.setItem(`drawings_${pdfId}_${pageNumber}`, strokes);
+  },
+
+  async clearPageDrawings(pdfId: string, pageNumber: number) {
+    await drawingStore.removeItem(`drawings_${pdfId}_${pageNumber}`);
+  },
+
+  // --- Voice Recording Memos ---
+  async getAudioMemos(pdfId: string): Promise<any[]> {
+    const memos = await audioStore.getItem<any[]>(`memos_${pdfId}`);
+    return memos || [];
+  },
+
+  async saveAudioMemo(pdfId: string, memo: { id: string; name: string; addedAt: number; duration?: number }, audioBlob: Blob) {
+    const currentMemos = await this.getAudioMemos(pdfId);
+    currentMemos.push(memo);
+    await audioStore.setItem(`memos_${pdfId}`, currentMemos);
+    await audioStore.setItem(`blob_${memo.id}`, audioBlob);
+  },
+
+  async getAudioMemoBlob(memoId: string): Promise<Blob | null> {
+    return await audioStore.getItem<Blob>(`blob_${memoId}`);
+  },
+
+  async deleteAudioMemo(pdfId: string, memoId: string) {
+    const currentMemos = await this.getAudioMemos(pdfId);
+    const updated = currentMemos.filter(m => m.id !== memoId);
+    await audioStore.setItem(`memos_${pdfId}`, updated);
+    await audioStore.removeItem(`blob_${memoId}`);
   }
 };

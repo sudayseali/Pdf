@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, memo, useMemo, useCallback } from 'react';
 import { Document, Page, Outline, pdfjs } from 'react-pdf';
 import { AlignLeft } from 'lucide-react';
+import { DrawingCanvas } from './DrawingCanvas';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
@@ -15,8 +16,19 @@ interface PdfViewerProps {
   onLoadSuccess: (numPages: number) => void;
   searchText?: string;
   invertColors?: boolean;
+  pageTheme?: 'normal' | 'night' | 'sepia' | 'eye-care';
   sidebarOpen?: boolean;
   onPageChange?: (page: number) => void;
+
+  // Drawing Props
+  pdfId?: string;
+  drawingTool?: 'none' | 'pen' | 'highlighter' | 'eraser';
+  penColor?: string;
+  penWidth?: number;
+  highlighterColor?: string;
+  highlighterWidth?: number;
+  eraserWidth?: number;
+  canvasRefs?: React.MutableRefObject<Record<number, any>>;
 }
 
 export const PdfViewer = memo(function PdfViewer({ 
@@ -26,13 +38,25 @@ export const PdfViewer = memo(function PdfViewer({
   onLoadSuccess,
   searchText,
   invertColors,
+  pageTheme = 'normal',
   sidebarOpen,
-  onPageChange
+  onPageChange,
+
+  // Drawing Props defaults
+  pdfId = '',
+  drawingTool = 'none',
+  penColor = '#ef4444',
+  penWidth = 3,
+  highlighterColor = 'rgba(254, 240, 138, 0.4)',
+  highlighterWidth = 14,
+  eraserWidth = 18,
+  canvasRefs
 }: PdfViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(window.innerWidth);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
+  const [pageHeights, setPageHeights] = useState<Record<number, number>>({});
   
   const isInternalScroll = useRef(false);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -203,30 +227,81 @@ export const PdfViewer = memo(function PdfViewer({
         {/* PDF Pages Container (Continuous Scroll) */}
         <div 
           ref={containerRef}
-          className={`flex-1 overflow-auto transition-colors ${invertColors ? 'bg-slate-900' : 'bg-slate-100 dark:bg-slate-950'} relative scroll-smooth w-full h-full`}
+          className={`flex-1 overflow-auto transition-colors ${
+            pageTheme === 'night' || invertColors
+              ? 'bg-slate-950'
+              : pageTheme === 'sepia'
+              ? 'bg-[#efe6cf]'
+              : pageTheme === 'eye-care'
+              ? 'bg-[#dcefe0]'
+              : 'bg-slate-100 dark:bg-slate-950'
+          } relative scroll-smooth w-full h-full`}
         >
           <div className="flex flex-col items-center min-w-max mx-auto pt-[calc(env(safe-area-inset-top,0px)+74px)] pb-32">
             {numPages ? (
-              Array.from(new Array(numPages), (el, index) => (
-                <div 
-                  key={`page_${index + 1}`} 
-                  id={`pdf-page-${index + 1}`}
-                  className="overflow-hidden bg-white dark:bg-slate-900 border-b border-slate-200/20 dark:border-slate-800/10 last:border-b-0"
-                  style={{ width: maxWidth * zoom }}
-                >
-                  <Page
-                    pageNumber={index + 1}
-                    width={maxWidth * zoom}
-                    className={`${invertColors ? 'invert hue-rotate-180 brightness-95' : ''}`}
-                    renderTextLayer={true}
-                    renderAnnotationLayer={true}
-                    customTextRenderer={textRenderer}
-                    loading={
-                      <div className="w-full aspect-[1/1.414] bg-slate-200 dark:bg-slate-800 animate-pulse" />
-                    }
-                  />
-                </div>
-              ))
+              Array.from(new Array(numPages), (el, index) => {
+                const pageNum = index + 1;
+                const pageW = maxWidth * zoom;
+                const pageH = pageHeights[pageNum] || (pageW * 1.414);
+
+                return (
+                  <div 
+                    key={`page_${pageNum}`} 
+                    id={`pdf-page-${pageNum}`}
+                    className="relative overflow-hidden bg-white dark:bg-slate-900 shadow-md mb-6 rounded-md select-none border border-slate-200/10"
+                    style={{ width: pageW, height: pageH }}
+                  >
+                    <Page
+                      pageNumber={pageNum}
+                      width={pageW}
+                      className={`${(pageTheme === 'night' || invertColors) ? 'invert hue-rotate-180 brightness-95' : ''}`}
+                      renderTextLayer={true}
+                      renderAnnotationLayer={true}
+                      customTextRenderer={textRenderer}
+                      onLoadSuccess={(page) => {
+                        setPageHeights(prev => ({ ...prev, [pageNum]: page.height }));
+                      }}
+                      loading={
+                        <div className="w-full h-full bg-slate-200 dark:bg-slate-800 animate-pulse" />
+                      }
+                    />
+
+                    {/* Eye comfort overlays */}
+                    {pageTheme === 'sepia' && (
+                      <div className="absolute inset-0 bg-[#f4ecd8] mix-blend-multiply pointer-events-none z-20 rounded-md" />
+                    )}
+                    {pageTheme === 'eye-care' && (
+                      <div className="absolute inset-0 bg-[#e3f4e1] mix-blend-multiply pointer-events-none z-20 rounded-md" />
+                    )}
+
+                    {/* Samsung-style Drawing Overlay Canvas */}
+                    {pdfId && (
+                      <DrawingCanvas
+                        ref={(el) => {
+                          if (canvasRefs) {
+                            if (el) {
+                              canvasRefs.current[pageNum] = el;
+                            } else {
+                              delete canvasRefs.current[pageNum];
+                            }
+                          }
+                        }}
+                        pdfId={pdfId}
+                        pageNumber={pageNum}
+                        width={pageW}
+                        height={pageH}
+                        isDrawingEnabled={drawingTool !== 'none'}
+                        currentTool={drawingTool}
+                        strokeColor={penColor}
+                        strokeWidth={penWidth}
+                        highlighterColor={highlighterColor}
+                        highlighterWidth={highlighterWidth}
+                        eraserWidth={eraserWidth}
+                      />
+                    )}
+                  </div>
+                );
+              })
             ) : (
               <div className="w-full max-w-lg aspect-[1/1.4] bg-slate-200 dark:bg-slate-800 animate-pulse rounded shadow-2xl" />
             )}

@@ -15,6 +15,7 @@ export interface PdfMetadata {
   numPages?: number;
   notes?: string;
   invertColors?: boolean;
+  pageTheme?: 'normal' | 'night' | 'sepia' | 'eye-care';
 }
 
 export type Screen = 'Home' | 'Library' | 'Reader';
