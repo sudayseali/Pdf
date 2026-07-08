@@ -5,6 +5,8 @@ export interface PdfDocument {
   addedAt: number;
   lastOpenedAt?: number;
   isSensitive?: boolean;
+  tags?: string[];
+  isFavorite?: boolean;
 }
 
 export interface PdfMetadata {

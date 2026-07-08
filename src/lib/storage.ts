@@ -51,6 +51,24 @@ export const storage = {
     }
   },
 
+  async updateTags(id: string, tags: string[]) {
+    const library = await this.getLibrary();
+    const docIndex = library.findIndex(d => d.id === id);
+    if (docIndex !== -1) {
+      library[docIndex].tags = tags;
+      await libraryStore.setItem('documents', library);
+    }
+  },
+
+  async toggleFavorite(id: string, isFavorite: boolean) {
+    const library = await this.getLibrary();
+    const docIndex = library.findIndex(d => d.id === id);
+    if (docIndex !== -1) {
+      library[docIndex].isFavorite = isFavorite;
+      await libraryStore.setItem('documents', library);
+    }
+  },
+
   async getLibrary(): Promise<PdfDocument[]> {
     const docs = await libraryStore.getItem<PdfDocument[]>('documents');
     return docs || [];
