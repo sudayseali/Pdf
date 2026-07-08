@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, memo, useMemo, useCallback } from 'react';
 import { Document, Page, Outline, pdfjs } from 'react-pdf';
-import { AlignLeft, FileText } from 'lucide-react';
+import { AlignLeft } from 'lucide-react';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
@@ -16,11 +16,7 @@ interface PdfViewerProps {
   searchText?: string;
   invertColors?: boolean;
   sidebarOpen?: boolean;
-  sidebarTab?: 'outline' | 'notes';
-  notes?: string;
-  onNotesChange?: (notes: string) => void;
   onPageChange?: (page: number) => void;
-  scrollDirection?: 'vertical' | 'horizontal';
 }
 
 export const PdfViewer = memo(function PdfViewer({ 
@@ -31,23 +27,15 @@ export const PdfViewer = memo(function PdfViewer({
   searchText,
   invertColors,
   sidebarOpen,
-  sidebarTab: externalSidebarTab,
-  notes,
-  onNotesChange,
-  onPageChange,
-  scrollDirection = 'horizontal'
+  onPageChange
 }: PdfViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(window.innerWidth);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [numPages, setNumPages] = useState<number | null>(null);
   
-  const [internalSidebarTab, setInternalSidebarTab] = useState<'outline' | 'notes'>(externalSidebarTab || 'outline');
-
-  useEffect(() => {
-    if (externalSidebarTab) {
-      setInternalSidebarTab(externalSidebarTab);
-    }
-  }, [externalSidebarTab]);
+  const isInternalScroll = useRef(false);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const documentOptions = useMemo(() => ({
     cMapUrl: 'https://unpkg.com/pdfjs-dist@5.4.296/cmaps/',
@@ -75,40 +63,61 @@ export const PdfViewer = memo(function PdfViewer({
     };
   }, [sidebarOpen]);
 
-  const touchStart = useRef<{x: number, y: number, time: number} | null>(null);
-
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length === 1 && zoom === 1) { // Only swipe pages if zoom is 1
-      touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, time: Date.now() };
-    } else {
-      touchStart.current = null;
-    }
-  }, [zoom]);
-
-  const onTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (!touchStart.current || !onPageChange || zoom !== 1) return;
-    const endX = e.changedTouches[0].clientX;
-    const endY = e.changedTouches[0].clientY;
+  // Observer to track which page is mostly in view
+  useEffect(() => {
+    if (!numPages || !containerRef.current) return;
     
-    const dx = endX - touchStart.current.x;
-    const dy = endY - touchStart.current.y;
-    const dt = Date.now() - touchStart.current.time;
-    
-    if (dt > 1000) return; // Ignore very slow swipes
-    
-    if (scrollDirection === 'horizontal') {
-      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
-        if (dx > 0) onPageChange(currentPage - 1);
-        else onPageChange(currentPage + 1);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        let maxRatio = 0;
+        let mostVisiblePage = -1;
+        
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+            maxRatio = entry.intersectionRatio;
+            const pageNum = parseInt(entry.target.id.replace('pdf-page-', ''), 10);
+            if (pageNum) mostVisiblePage = pageNum;
+          }
+        });
+        
+        if (mostVisiblePage !== -1 && onPageChange) {
+          isInternalScroll.current = true;
+          onPageChange(mostVisiblePage);
+          
+          if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+          scrollTimeout.current = setTimeout(() => {
+            isInternalScroll.current = false;
+          }, 500);
+        }
+      },
+      {
+        root: containerRef.current,
+        threshold: [0.1, 0.3, 0.5, 0.7, 0.9], // Check at multiple thresholds for accuracy
+        rootMargin: "-20% 0px -20% 0px"
       }
-    } else {
-      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 30) {
-        if (dy > 0) onPageChange(currentPage - 1);
-        else onPageChange(currentPage + 1);
-      }
+    );
+
+    const pageElements = containerRef.current.querySelectorAll('[id^="pdf-page-"]');
+    pageElements.forEach((el) => observer.observe(el));
+
+    return () => {
+      observer.disconnect();
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+    };
+  }, [numPages, onPageChange]);
+
+  // Scroll to page when currentPage changes externally (e.g. outline click, prev/next buttons)
+  useEffect(() => {
+    if (isInternalScroll.current) return;
+    
+    const el = document.getElementById(`pdf-page-${currentPage}`);
+    if (el && containerRef.current) {
+      const container = containerRef.current;
+      // Scroll such that the page is near the top, accounting for the top bar
+      const topPos = el.offsetTop - container.offsetTop - 80;
+      container.scrollTo({ top: topPos, behavior: 'smooth' });
     }
-    touchStart.current = null;
-  }, [scrollDirection, currentPage, onPageChange, zoom]);
+  }, [currentPage]);
 
   const textRenderer = useCallback((textItem: any) => {
     const str = textItem.str;
@@ -133,16 +142,22 @@ export const PdfViewer = memo(function PdfViewer({
 
   if (!fileConfig) return null;
 
+  // Calculate a responsive width with padding so the PDF doesn't stick to the edges
+  const maxWidth = containerWidth - (sidebarOpen ? 320 : 0);
+
   return (
     <div className="flex-1 flex overflow-hidden w-full h-full relative">
       <Document
         file={fileConfig}
         options={documentOptions}
-        onLoadSuccess={({ numPages }) => onLoadSuccess(numPages)}
+        onLoadSuccess={(pdf) => {
+          setNumPages(pdf.numPages);
+          onLoadSuccess(pdf.numPages);
+        }}
         onLoadError={(error) => setErrorMessage(error.message)}
         loading={
           <div className="flex-1 flex items-center justify-center bg-slate-100 dark:bg-slate-950">
-            <div className="w-full max-w-lg aspect-[1/1.4] bg-white dark:bg-slate-800 animate-pulse rounded shadow-2xl" />
+            <div className="w-full h-full bg-slate-200 dark:bg-slate-800 animate-pulse" />
           </div>
         }
         error={
@@ -157,70 +172,65 @@ export const PdfViewer = memo(function PdfViewer({
         {/* Sidebar */}
         {sidebarOpen && (
           <div className="w-64 md:w-80 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-10 shrink-0 h-full shadow-lg">
-            <div className="flex border-b border-slate-200 dark:border-slate-800">
-              <button 
-                onClick={() => setInternalSidebarTab('outline')}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${internalSidebarTab === 'outline' ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
-              >
+            <div className="flex border-b border-slate-200 dark:border-slate-800 p-3 mt-14">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                 <AlignLeft className="w-4 h-4" />
-                Outline
-              </button>
-              <button 
-                onClick={() => setInternalSidebarTab('notes')}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${internalSidebarTab === 'notes' ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
-              >
-                <FileText className="w-4 h-4" />
-                Notes
-              </button>
+                Table of Contents
+              </h2>
             </div>
             
             <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-              {internalSidebarTab === 'outline' && (
-                <div className="text-sm dark:text-slate-300 outline-container">
-                  <Outline 
-                    className="outline-list"
-                    onItemClick={({ pageNumber }) => onPageChange && onPageChange(pageNumber)}
-                  />
-                  <style>{`
-                    .outline-container ul { list-style: none; padding-left: 1rem; margin-top: 0.5rem; }
-                    .outline-container > ul { padding-left: 0; }
-                    .outline-container li { margin-bottom: 0.5rem; }
-                    .outline-container a { color: inherit; text-decoration: none; display: block; padding: 0.25rem 0.5rem; border-radius: 0.25rem; transition: background 0.2s; }
-                    .outline-container a:hover { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-                  `}</style>
-                </div>
-              )}
-              {internalSidebarTab === 'notes' && (
-                <textarea 
-                  className="w-full h-full min-h-[300px] resize-none bg-transparent text-slate-700 dark:text-slate-200 focus:outline-none placeholder-slate-400 text-sm leading-relaxed"
-                  placeholder="Write your notes here... They will be saved automatically with this document."
-                  value={notes || ''}
-                  onChange={e => onNotesChange && onNotesChange(e.target.value)}
+              <div className="text-sm dark:text-slate-300 outline-container">
+                <Outline 
+                  className="outline-list"
+                  onItemClick={({ pageNumber }) => {
+                    isInternalScroll.current = false;
+                    if (onPageChange) onPageChange(pageNumber);
+                  }}
                 />
-              )}
+                <style>{`
+                  .outline-container ul { list-style: none; padding-left: 1rem; margin-top: 0.5rem; }
+                  .outline-container > ul { padding-left: 0; }
+                  .outline-container li { margin-bottom: 0.5rem; }
+                  .outline-container a { color: inherit; text-decoration: none; display: block; padding: 0.25rem 0.5rem; border-radius: 0.25rem; transition: background 0.2s; }
+                  .outline-container a:hover { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+                `}</style>
+              </div>
             </div>
           </div>
         )}
 
-        {/* PDF Page Container */}
+        {/* PDF Pages Container (Continuous Scroll) */}
         <div 
           ref={containerRef}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
-          style={{ touchAction: zoom === 1 ? (scrollDirection === 'horizontal' ? 'pan-y' : 'pan-x') : 'auto' }}
-          className={`flex-1 overflow-auto flex flex-col items-center justify-center md:p-4 transition-colors ${invertColors ? 'bg-slate-900' : 'bg-slate-100 dark:bg-slate-950'}`}
+          className={`flex-1 overflow-auto transition-colors ${invertColors ? 'bg-slate-900' : 'bg-slate-100 dark:bg-slate-950'} relative scroll-smooth w-full h-full`}
         >
-          <Page
-            pageNumber={currentPage}
-            width={Math.min(containerWidth - (sidebarOpen ? 320 : 0), 800) * zoom}
-            className={`shadow-2xl bg-white rounded overflow-hidden transition-all duration-200 transform origin-top ${invertColors ? 'invert hue-rotate-180 brightness-95' : ''}`}
-            renderTextLayer={true}
-            renderAnnotationLayer={true}
-            customTextRenderer={textRenderer}
-            loading={
+          <div className="flex flex-col items-center min-w-max mx-auto pt-[calc(env(safe-area-inset-top,0px)+74px)] pb-32">
+            {numPages ? (
+              Array.from(new Array(numPages), (el, index) => (
+                <div 
+                  key={`page_${index + 1}`} 
+                  id={`pdf-page-${index + 1}`}
+                  className="overflow-hidden bg-white dark:bg-slate-900 border-b border-slate-200/20 dark:border-slate-800/10 last:border-b-0"
+                  style={{ width: maxWidth * zoom }}
+                >
+                  <Page
+                    pageNumber={index + 1}
+                    width={maxWidth * zoom}
+                    className={`${invertColors ? 'invert hue-rotate-180 brightness-95' : ''}`}
+                    renderTextLayer={true}
+                    renderAnnotationLayer={true}
+                    customTextRenderer={textRenderer}
+                    loading={
+                      <div className="w-full aspect-[1/1.414] bg-slate-200 dark:bg-slate-800 animate-pulse" />
+                    }
+                  />
+                </div>
+              ))
+            ) : (
               <div className="w-full max-w-lg aspect-[1/1.4] bg-slate-200 dark:bg-slate-800 animate-pulse rounded shadow-2xl" />
-            }
-          />
+            )}
+          </div>
         </div>
       </Document>
     </div>

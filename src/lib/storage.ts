@@ -114,15 +114,6 @@ export const storage = {
     await settingsStore.setItem('autoDarkMode', isAuto);
   },
 
-  async getScrollDirection(): Promise<'vertical' | 'horizontal'> {
-    const dir = await settingsStore.getItem<'vertical' | 'horizontal'>('scrollDirection');
-    return dir || 'vertical';
-  },
-
-  async setScrollDirection(dir: 'vertical' | 'horizontal') {
-    await settingsStore.setItem('scrollDirection', dir);
-  },
-
   async getPin(): Promise<string | null> {
     return await settingsStore.getItem<string>('app_pin');
   },

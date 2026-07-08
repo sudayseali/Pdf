@@ -13,8 +13,7 @@ export default function App() {
     currentScreen: 'Home',
     selectedPdfId: null,
     darkMode: false,
-    autoDarkMode: true,
-    scrollDirection: 'horizontal'
+    autoDarkMode: true
   });
 
   const [currentPdfName, setCurrentPdfName] = useState<string>('');
@@ -34,10 +33,9 @@ export default function App() {
     // Load dark mode preference on boot
     Promise.all([
       storage.getDarkMode(), 
-      storage.getAutoDarkMode(),
-      storage.getScrollDirection()
-    ]).then(([mode, auto, scrollDir]) => {
-      setState(s => ({ ...s, darkMode: mode, autoDarkMode: auto, scrollDirection: scrollDir }));
+      storage.getAutoDarkMode()
+    ]).then(([mode, auto]) => {
+      setState(s => ({ ...s, darkMode: mode, autoDarkMode: auto }));
     });
     
     // Check if app has PIN configured on boot
@@ -94,12 +92,6 @@ export default function App() {
     const newAuto = !state.autoDarkMode;
     setState(s => ({ ...s, autoDarkMode: newAuto }));
     storage.setAutoDarkMode(newAuto);
-  };
-
-  const toggleScrollDirection = () => {
-    const newDir = state.scrollDirection === 'vertical' ? 'horizontal' : 'vertical';
-    setState(s => ({ ...s, scrollDirection: newDir }));
-    storage.setScrollDirection(newDir);
   };
 
   const handleNavigate = async (screen: Screen, pdfId?: string, isSensitive?: boolean) => {
@@ -194,14 +186,13 @@ export default function App() {
           appState={state}
           onToggleDarkMode={toggleDarkMode}
           onToggleAutoDarkMode={toggleAutoDarkMode}
-          onToggleScrollDirection={toggleScrollDirection}
         />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans antialiased overflow-hidden transition-colors selection:bg-blue-200 dark:selection:bg-blue-900 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
+    <div className="flex flex-col h-[100dvh] w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans antialiased overflow-hidden transition-colors selection:bg-blue-200 dark:selection:bg-blue-900 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       {state.currentScreen !== 'Reader' && (
         <Header 
           title={getHeaderTitle()}
@@ -237,7 +228,6 @@ export default function App() {
             pdfId={state.selectedPdfId} 
             onSessionEnd={handleSessionEnd} 
             onBack={handleBack} 
-            scrollDirection={state.scrollDirection}
           />
         )}
       </main>
@@ -253,7 +243,6 @@ export default function App() {
         appState={state}
         onToggleDarkMode={toggleDarkMode}
         onToggleAutoDarkMode={toggleAutoDarkMode}
-        onToggleScrollDirection={toggleScrollDirection}
       />
 
       {toastMessage && (

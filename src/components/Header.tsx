@@ -14,7 +14,7 @@ interface HeaderProps {
 
 export function Header({ title, showBack, onBack, darkMode, toggleDarkMode, autoDarkMode, toggleAutoDarkMode, rightAction }: HeaderProps) {
   return (
-    <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 shrink-0 shadow-sm dark:shadow-lg transition-colors z-10">
+    <header className="pt-[env(safe-area-inset-top,0px)] h-[calc(env(safe-area-inset-top,0px)+4rem)] bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 shrink-0 shadow-sm dark:shadow-lg transition-colors z-10">
       <div className="flex items-center gap-4 overflow-hidden">
         {showBack && (
           <button 

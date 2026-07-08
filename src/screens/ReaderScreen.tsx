@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ChevronLeft, Search, Sun, Moon, Sidebar as SidebarIcon, X } from 'lucide-react';
+import { ChevronLeft, Search, Sun, Moon, Sidebar as SidebarIcon, X, FileText } from 'lucide-react';
 import { PdfViewer } from '../components/PdfViewer';
 import { BottomControls } from '../components/BottomControls';
 import { storage } from '../lib/storage';
@@ -9,10 +9,9 @@ interface ReaderScreenProps {
   pdfId: string;
   onSessionEnd?: (durationSeconds: number) => void;
   onBack: () => void;
-  scrollDirection: 'vertical' | 'horizontal';
 }
 
-export function ReaderScreen({ pdfId, onSessionEnd, onBack, scrollDirection }: ReaderScreenProps) {
+export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps) {
   const [fileData, setFileData] = useState<ArrayBuffer | null>(null);
   const [documentInfo, setDocumentInfo] = useState<PdfDocument | null>(null);
   const [metadata, setMetadata] = useState<PdfMetadata | null>(null);
@@ -118,6 +117,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack, scrollDirection }: R
     }
   };
 
+
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center bg-slate-50 dark:bg-slate-950">
@@ -138,8 +138,8 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack, scrollDirection }: R
   return (
     <div className="flex-1 flex flex-col overflow-hidden relative bg-slate-100 dark:bg-slate-950">
       {/* Top Controls Bar */}
-      <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm z-20 shrink-0">
-        <div className="flex items-center gap-3 w-1/3">
+      <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 shadow-sm z-20">
+        <div className="flex items-center gap-2 md:gap-3 w-[30%]">
           <button 
             onClick={onBack}
             className="p-1.5 -ml-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors flex items-center"
@@ -151,25 +151,25 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack, scrollDirection }: R
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className={`p-1.5 rounded-md transition-colors ${sidebarOpen ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
-            title="Toggle Outline & Notes"
+            title="Toggle Outline"
           >
             <SidebarIcon className="w-5 h-5" />
           </button>
         </div>
         
-        <div className="w-1/3 flex justify-center">
+        <div className="w-[40%] flex justify-center">
           <h1 className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate max-w-[200px] md:max-w-[400px]">
             {documentInfo?.name || 'Document'}
           </h1>
         </div>
         
-        <div className="w-1/3 flex items-center justify-end gap-1 md:gap-2">
+        <div className="w-[30%] flex items-center justify-end gap-1 md:gap-2">
           {isSearchOpen && (
-            <div className="relative flex-1 max-w-[200px] animate-in slide-in-from-right-4 fade-in duration-200">
+            <div className="relative flex-1 max-w-[150px] md:max-w-[200px] animate-in slide-in-from-right-4 fade-in duration-200 hidden sm:block">
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder="Search text..."
+                placeholder="Search..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-full pl-3 pr-8 py-1.5 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -185,7 +185,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack, scrollDirection }: R
           
           <button 
             onClick={toggleSearch}
-            className={`p-1.5 rounded-full transition-colors ${isSearchOpen ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+            className={`p-1.5 rounded-full transition-colors hidden sm:block ${isSearchOpen ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
             title="Search text"
           >
             <Search className="w-4 h-4" />
@@ -194,26 +194,26 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack, scrollDirection }: R
           <button 
             onClick={handleToggleInvertColors}
             className={`p-1.5 rounded-full transition-colors ${metadata.invertColors ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
-            title="Toggle Night Mode (Invert Colors)"
+            title="Toggle Night Mode"
           >
             {metadata.invertColors ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
         </div>
       </div>
 
-      <PdfViewer 
-        fileData={fileData}
-        currentPage={metadata.lastPage}
-        zoom={zoom}
-        onLoadSuccess={handleLoadSuccess}
-        searchText={searchText}
-        invertColors={metadata.invertColors}
-        sidebarOpen={sidebarOpen}
-        notes={metadata.notes}
-        onNotesChange={handleNotesChange}
-        onPageChange={jumpToPage}
-        scrollDirection={scrollDirection}
-      />
+      <div className="flex-1 flex overflow-hidden relative">
+        <PdfViewer 
+          fileData={fileData}
+          currentPage={metadata.lastPage}
+          zoom={zoom}
+          onLoadSuccess={handleLoadSuccess}
+          searchText={searchText}
+          invertColors={metadata.invertColors}
+          sidebarOpen={sidebarOpen}
+          onPageChange={jumpToPage}
+        />
+
+      </div>
       
       <BottomControls 
         currentPage={metadata.lastPage}

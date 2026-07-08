@@ -11,12 +11,11 @@ export interface SettingsModalProps {
   appState: AppState;
   onToggleDarkMode: () => void;
   onToggleAutoDarkMode: () => void;
-  onToggleScrollDirection: () => void;
 }
 
 export function SettingsModal({ 
   isOpen, onClose, mode, onVerifySuccess, 
-  appState, onToggleDarkMode, onToggleAutoDarkMode, onToggleScrollDirection 
+  appState, onToggleDarkMode, onToggleAutoDarkMode 
 }: SettingsModalProps) {
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
@@ -179,29 +178,6 @@ export function SettingsModal({
                     <input type="checkbox" className="sr-only peer" checked={appState.autoDarkMode} onChange={onToggleAutoDarkMode} />
                     <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                   </label>
-                </div>
-              </div>
-
-              {/* Reading Section */}
-              <div className="space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Reading</h3>
-                
-                <div 
-                  onClick={onToggleScrollDirection}
-                  className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-800 cursor-pointer active:scale-[0.98] transition-transform"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                      {appState.scrollDirection === 'vertical' ? <MoveVertical className="w-4 h-4" /> : <MoveHorizontal className="w-4 h-4" />}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Scroll Direction</p>
-                      <p className="text-[10px] text-slate-500">Swipe {appState.scrollDirection === 'vertical' ? 'up/down' : 'left/right'} to turn pages</p>
-                    </div>
-                  </div>
-                  <div className="text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 px-2 py-1 rounded">
-                    {appState.scrollDirection === 'vertical' ? 'Vertical' : 'Horizontal'}
-                  </div>
                 </div>
               </div>
 

@@ -11,6 +11,7 @@ interface LibraryDocument extends PdfDocument {
   progress?: number;
   lastPage?: number;
   numPages?: number;
+  notes?: string;
 }
 
 const PRESET_TAGS = ['Work', 'Personal', 'Archive', 'Study', 'Important'];
@@ -32,6 +33,10 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
   const [customTagInput, setCustomTagInput] = useState('');
   const tagInputRef = useRef<HTMLInputElement>(null);
   
+  // Notes state
+  const [notesModalDocId, setNotesModalDocId] = useState<string | null>(null);
+  const [notesInput, setNotesInput] = useState('');
+  
   const tagModalDoc = tagModalDocId ? documents.find(d => d.id === tagModalDocId) : null;
 
   useEffect(() => {
@@ -48,7 +53,7 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
           if (meta.numPages && meta.numPages > 0) {
             progress = (meta.lastPage / meta.numPages) * 100;
           }
-          return { ...doc, lastPage: meta.lastPage, numPages: meta.numPages, progress };
+          return { ...doc, lastPage: meta.lastPage, numPages: meta.numPages, progress, notes: meta.notes };
         })
       );
       setDocuments(docsWithMeta);
@@ -113,6 +118,25 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
     setTimeout(() => {
       tagInputRef.current?.focus();
     }, 100);
+  };
+
+  const handleOpenNotes = (e: React.MouseEvent, doc: LibraryDocument) => {
+    e.stopPropagation();
+    setNotesInput(doc.notes || '');
+    setNotesModalDocId(doc.id);
+  };
+
+  const handleSaveNotes = async () => {
+    if (!notesModalDocId) return;
+    
+    const meta = await storage.getPdfMetadata(notesModalDocId);
+    await storage.savePdfMetadata(notesModalDocId, { ...meta, notes: notesInput });
+    
+    setDocuments(prev => prev.map(doc => 
+      doc.id === notesModalDocId ? { ...doc, notes: notesInput } : doc
+    ));
+    
+    setNotesModalDocId(null);
   };
 
   const formatSize = (bytes: number) => {
@@ -388,6 +412,14 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
                             >
                               <Tag className="w-4 h-4" />
                             </button>
+                            <button 
+                              onClick={(e) => handleOpenNotes(e, doc)}
+                              className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-full transition-colors relative"
+                              title="Document notes"
+                            >
+                              <FileText className="w-4 h-4" />
+                              {doc.notes && <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-amber-500 rounded-full"></span>}
+                            </button>
                           </div>
                           <div className="flex items-center gap-1">
                             <button 
@@ -425,6 +457,14 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
                           title="Manage tags"
                         >
                           <Tag className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={(e) => handleOpenNotes(e, doc)}
+                          className="p-2 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-full transition-colors relative"
+                          title="Document notes"
+                        >
+                          <FileText className="w-4 h-4" />
+                          {doc.notes && <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-amber-500 rounded-full"></span>}
                         </button>
                         <button 
                           onClick={(e) => handleToggleSensitive(e, doc.id, !!doc.isSensitive)}
@@ -535,6 +575,50 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
                   </button>
                 </form>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notes Modal */}
+      {notesModalDocId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-amber-500" />
+                Document Notes
+              </h3>
+              <button 
+                onClick={() => setNotesModalDocId(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-4 flex-1 overflow-y-auto">
+              <textarea 
+                className="w-full h-48 sm:h-64 resize-none bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-amber-500/50 placeholder-slate-400 text-sm leading-relaxed"
+                placeholder="Write your notes for this document here..."
+                value={notesInput}
+                onChange={e => setNotesInput(e.target.value)}
+              />
+            </div>
+            
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
+              <button 
+                onClick={() => setNotesModalDocId(null)}
+                className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSaveNotes}
+                className="px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition-colors shadow-sm"
+              >
+                Save Notes
+              </button>
             </div>
           </div>
         </div>
