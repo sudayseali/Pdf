@@ -237,7 +237,7 @@ export const PdfViewer = memo(function PdfViewer({
               : 'bg-slate-100 dark:bg-slate-950'
           } relative scroll-smooth w-full h-full`}
         >
-          <div className="flex flex-col items-center min-w-max mx-auto pt-[calc(env(safe-area-inset-top,0px)+74px)] pb-32">
+          <div className="flex flex-col items-center min-w-max mx-auto pt-28 sm:pt-20 pb-32">
             {numPages ? (
               Array.from(new Array(numPages), (el, index) => {
                 const pageNum = index + 1;

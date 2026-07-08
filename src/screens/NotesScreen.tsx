@@ -16,6 +16,32 @@ const NOTE_COLORS = [
   { id: 'purple', name: 'Purple', bg: 'bg-purple-50 dark:bg-purple-950/20', border: 'border-purple-200 dark:border-purple-900/40 text-purple-800 dark:text-purple-300' }
 ];
 
+const FONTS = [
+  { id: 'Inter', name: 'Inter (Clean)', cssName: '"Inter", sans-serif' },
+  { id: 'Outfit', name: 'Outfit (Modern)', cssName: '"Outfit", sans-serif' },
+  { id: 'Space-Grotesk', name: 'Space Grotesk (Tech)', cssName: '"Space Grotesk", sans-serif' },
+  { id: 'Playfair-Display', name: 'Playfair (Elegant)', cssName: '"Playfair Display", serif' },
+  { id: 'Lora', name: 'Lora (Academic)', cssName: '"Lora", serif' },
+  { id: 'Georgia', name: 'Georgia (Classic)', cssName: 'Georgia, serif' },
+  { id: 'Merriweather', name: 'Merriweather (Read)', cssName: '"Merriweather", serif' },
+  { id: 'JetBrains-Mono', name: 'JetBrains Mono (Developer)', cssName: '"JetBrains Mono", monospace' },
+  { id: 'Caveat', name: 'Caveat (Handwritten)', cssName: '"Caveat", cursive' },
+  { id: 'Comic-Neue', name: 'Comic Neue (Friendly)', cssName: '"Comic Neue", cursive' }
+];
+
+const TEXT_COLORS = [
+  { id: 'default', name: 'Default', class: 'text-slate-800 dark:text-slate-200', value: '', dotBg: 'bg-slate-700 dark:bg-slate-300' },
+  { id: 'charcoal', name: 'Charcoal', class: 'text-slate-900 dark:text-slate-100', value: '#1e293b', dotBg: 'bg-[#1e293b]' },
+  { id: 'royal-blue', name: 'Royal Blue', class: 'text-blue-700 dark:text-blue-400', value: '#1d4ed8', dotBg: 'bg-[#1d4ed8]' },
+  { id: 'emerald-green', name: 'Emerald Green', class: 'text-emerald-700 dark:text-emerald-400', value: '#047857', dotBg: 'bg-[#047857]' },
+  { id: 'ruby-red', name: 'Ruby Red', class: 'text-rose-700 dark:text-rose-400', value: '#be123c', dotBg: 'bg-[#be123c]' },
+  { id: 'violet-purple', name: 'Violet Purple', class: 'text-purple-700 dark:text-purple-400', value: '#6d28d9', dotBg: 'bg-[#6d28d9]' },
+  { id: 'amber-gold', name: 'Amber Gold', class: 'text-amber-700 dark:text-amber-400', value: '#b45309', dotBg: 'bg-[#b45309]' },
+  { id: 'deep-teal', name: 'Deep Teal', class: 'text-teal-700 dark:text-teal-400', value: '#0f766e', dotBg: 'bg-[#0f766e]' },
+  { id: 'coral-rose', name: 'Coral Rose', class: 'text-rose-600 dark:text-rose-400', value: '#e11d48', dotBg: 'bg-[#e11d48]' },
+  { id: 'chocolate-brown', name: 'Chocolate Brown', class: 'text-yellow-950 dark:text-amber-200', value: '#78350f', dotBg: 'bg-[#78350f]' }
+];
+
 const PRESET_TAGS = ['General', 'Study', 'Personal', 'Work', 'Review', 'Ideas'];
 
 interface NotesScreenProps {
@@ -33,6 +59,8 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
   const [noteContent, setNoteContent] = useState('');
   const [noteTags, setNoteTags] = useState<string[]>([]);
   const [noteColor, setNoteColor] = useState('default');
+  const [noteFont, setNoteFont] = useState('Inter');
+  const [noteTextColor, setNoteTextColor] = useState('default');
   const [noteIsPinned, setNoteIsPinned] = useState(false);
   const [newTagInput, setNewTagInput] = useState('');
   
@@ -63,7 +91,9 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
       updatedAt: Date.now(),
       tags: [],
       isPinned: false,
-      color: 'default'
+      color: 'default',
+      fontFamily: 'Inter',
+      textColor: 'default'
     };
     
     setEditingNote(blankNote);
@@ -71,6 +101,8 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
     setNoteContent('');
     setNoteTags([]);
     setNoteColor('default');
+    setNoteFont('Inter');
+    setNoteTextColor('default');
     setNoteIsPinned(false);
   };
 
@@ -81,6 +113,8 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
     setNoteContent(note.content);
     setNoteTags(note.tags || []);
     setNoteColor(note.color || 'default');
+    setNoteFont(note.fontFamily || 'Inter');
+    setNoteTextColor(note.textColor || 'default');
     setNoteIsPinned(!!note.isPinned);
   };
 
@@ -95,6 +129,8 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
       content: noteContent,
       tags: noteTags,
       color: noteColor,
+      fontFamily: noteFont,
+      textColor: noteTextColor,
       isPinned: noteIsPinned,
       updatedAt: Date.now()
     };
@@ -285,6 +321,55 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
               </div>
             </div>
 
+            {/* Font & Color Styling Sub-bar */}
+            <div className="px-4 py-2 bg-slate-100/60 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+              {/* Font Family Selection */}
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0">
+                  Font:
+                </span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <select
+                    value={noteFont}
+                    onChange={(e) => setNoteFont(e.target.value)}
+                    className="text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-2 py-1 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-medium"
+                    style={{ fontFamily: FONTS.find(f => f.id === noteFont)?.cssName }}
+                  >
+                    {FONTS.map(font => (
+                      <option key={font.id} value={font.id} style={{ fontFamily: font.cssName }}>
+                        {font.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Text Color Selection */}
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0">
+                  Text Color:
+                </span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {TEXT_COLORS.map(color => (
+                    <button
+                      key={color.id}
+                      onClick={() => setNoteTextColor(color.id)}
+                      className={`w-5 h-5 rounded-full border transition-all relative flex items-center justify-center ${color.dotBg} ${
+                        noteTextColor === color.id 
+                          ? 'ring-2 ring-indigo-500 scale-110 border-indigo-500' 
+                          : 'border-slate-300 dark:border-slate-600 hover:scale-105'
+                      }`}
+                      title={color.name}
+                    >
+                      {noteTextColor === color.id && (
+                        <Check className="w-2.5 h-2.5 text-white stroke-[3px]" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {/* Note Input Fields (Styled with selected color) */}
             <div className={`flex-1 p-6 overflow-y-auto flex flex-col space-y-4 transition-colors ${
               NOTE_COLORS.find(c => c.id === noteColor)?.bg || 'bg-white dark:bg-slate-900'
@@ -297,10 +382,14 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                 value={noteTitle}
                 onChange={(e) => setNoteTitle(e.target.value)}
                 className="w-full text-xl font-bold bg-transparent border-none focus:outline-none focus:ring-0 text-slate-900 dark:text-white placeholder-slate-400/80"
+                style={{ 
+                  fontFamily: FONTS.find(f => f.id === noteFont)?.cssName,
+                  color: TEXT_COLORS.find(c => c.id === noteTextColor)?.value || undefined
+                }}
               />
 
               {/* Date stamp and word count */}
-              <div className="flex items-center gap-3 text-[10px] font-mono text-slate-400 dark:text-slate-500">
+              <div className="flex items-center gap-3 text-[10px] font-mono text-slate-400 dark:text-slate-500 font-medium">
                 <div className="flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
                   <span>{new Date(editingNote.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
@@ -316,7 +405,11 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                 placeholder="Write your note details here..."
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
-                className="w-full flex-1 resize-none bg-transparent border-none focus:outline-none focus:ring-0 text-sm leading-relaxed text-slate-800 dark:text-slate-200 placeholder-slate-400/80 min-h-[250px]"
+                className="w-full flex-1 resize-none bg-transparent border-none focus:outline-none focus:ring-0 text-sm leading-relaxed placeholder-slate-400/80 min-h-[250px]"
+                style={{ 
+                  fontFamily: FONTS.find(f => f.id === noteFont)?.cssName,
+                  color: TEXT_COLORS.find(c => c.id === noteTextColor)?.value || undefined
+                }}
               />
 
               {/* Tags Section */}
@@ -492,6 +585,8 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                   {sortedNotes.map(note => {
                     const matchedColor = NOTE_COLORS.find(c => c.id === note.color) || NOTE_COLORS[0];
+                    const noteFontObj = FONTS.find(f => f.id === note.fontFamily) || FONTS[0];
+                    const noteColorObj = TEXT_COLORS.find(c => c.id === note.textColor) || TEXT_COLORS[0];
                     return (
                       <div
                         key={note.id}
@@ -503,7 +598,13 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                         
                         {/* Pinned Marker / Top Header */}
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <h4 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                          <h4 
+                            className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
+                            style={{ 
+                              fontFamily: noteFontObj.cssName,
+                              color: noteColorObj.value || undefined
+                            }}
+                          >
                             {note.title || 'Untitled Note'}
                           </h4>
                           <div className="flex items-center gap-1 shrink-0">
@@ -514,7 +615,13 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                         </div>
 
                         {/* Note Body Excerpt */}
-                        <p className="text-xs text-slate-500 dark:text-slate-400/90 line-clamp-3 mb-4 leading-relaxed flex-1">
+                        <p 
+                          className="text-xs text-slate-500 dark:text-slate-400/90 line-clamp-3 mb-4 leading-relaxed flex-1"
+                          style={{ 
+                            fontFamily: noteFontObj.cssName,
+                            color: noteColorObj.value || undefined
+                          }}
+                        >
                           {note.content || <em className="text-slate-400/70">Empty... add details</em>}
                         </p>
 

@@ -321,7 +321,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
   return (
     <div className="flex-1 flex flex-col overflow-hidden relative bg-slate-100 dark:bg-slate-950">
       {/* Top Controls Bar */}
-      <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 shadow-sm z-20">
+      <div className="absolute top-0 inset-x-0 flex items-end sm:items-center justify-between px-4 pt-10 pb-3 sm:pt-2 sm:pb-2 h-24 sm:h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 shadow-sm z-20 transition-all">
         <div className="flex items-center gap-2 md:gap-3 w-[30%]">
           <button 
             onClick={onBack}
@@ -441,7 +441,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
 
       {/* Samsung-Style S-Pen Toolbar Dock */}
       {isDrawingMode && (
-        <div className="absolute top-[calc(env(safe-area-inset-top,0px)+4.1rem)] inset-x-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 px-4 py-2 flex items-center justify-between shadow-md z-30 transition-all overflow-x-auto gap-4 scrollbar-thin">
+        <div className="absolute top-24 sm:top-16 inset-x-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 px-4 py-2 flex items-center justify-between shadow-md z-30 transition-all overflow-x-auto gap-4 scrollbar-thin">
           <div className="flex items-center gap-1.5 shrink-0">
             {/* Pen Tool button */}
             <button

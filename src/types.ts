@@ -29,6 +29,8 @@ export interface StandaloneNote {
   tags: string[];
   isPinned: boolean;
   color?: string;
+  fontFamily?: string;
+  textColor?: string;
 }
 
 export interface AppState {
