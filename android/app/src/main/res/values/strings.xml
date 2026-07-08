@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">PDF Reader</string>
-    <string name="title_activity_main">PDF Reader</string>
+    <string name="app_name">SilentPDF</string>
+    <string name="title_activity_main">SilentPDF</string>
     <string name="package_name">com.example.pdfreader</string>
     <string name="custom_url_scheme">com.example.pdfreader</string>
 </resources>

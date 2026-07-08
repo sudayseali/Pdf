@@ -146,7 +146,7 @@ export default function App() {
 
   const getHeaderTitle = () => {
     switch (state.currentScreen) {
-      case 'Home': return 'PDF Reader';
+      case 'Home': return 'SilentPDF';
       case 'Library': return 'My Library';
       case 'Reader': return currentPdfName || 'Reading';
       case 'Notes': return 'My Notepad';
@@ -175,7 +175,7 @@ export default function App() {
             <AppLogo size={120} className="shadow-2xl shadow-blue-500/20" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-2xl font-black tracking-tight text-white">LexiView PDF</h1>
+            <h1 className="text-2xl font-black tracking-tight text-white">SilentPDF</h1>
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Pro Document Reader</p>
           </div>
         </div>
@@ -193,7 +193,7 @@ export default function App() {
       <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-300 dark:text-slate-800 pointer-events-none">
           <AppLogo size={120} className="opacity-15 mb-4 grayscale" />
-          <p className="text-lg font-bold opacity-30 tracking-widest uppercase">LexiView PDF Locked</p>
+          <p className="text-lg font-bold opacity-30 tracking-widest uppercase">SilentPDF Locked</p>
         </div>
         <SettingsModal 
           isOpen={settingsModalOpen}

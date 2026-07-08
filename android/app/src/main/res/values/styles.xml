@@ -19,8 +19,8 @@
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <!-- Set the background color of the splash screen -->
         <item name="windowSplashScreenBackground">#0f172a</item>
-        <!-- Set the splash screen icon (our custom high-quality launcher icon) -->
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <!-- Set the splash screen icon (our custom high-quality launcher icon foreground PNG) -->
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
         <!-- Specify the post-splash theme to transition into -->
         <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>

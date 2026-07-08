@@ -50,7 +50,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         <div className="text-center space-y-4">
           <AppLogo size={96} className="mx-auto" />
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">LexiView PDF</h2>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">SilentPDF</h2>
             <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mt-2">Pro Document Reader</p>
           </div>
         </div>
