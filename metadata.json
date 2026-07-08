@@ -1,6 +1,6 @@
 {
   "name": "Android-Style PDF Reader",
   "description": "A mobile-first offline PDF reader with local storage, bookmarks, and dark mode.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": ["microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -44,6 +44,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
 
   // Audio Recording State
   const [isAudioPanelOpen, setIsAudioPanelOpen] = useState(false);
+  const [audioPermissionError, setAudioPermissionError] = useState(false);
   const [audioMemos, setAudioMemos] = useState<any[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -145,6 +146,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
   // Recording Actions
   const startRecording = async () => {
     try {
+      setAudioPermissionError(false);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioChunksRef.current = [];
       
@@ -185,7 +187,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
       }, 1000);
     } catch (err) {
       console.error('Error starting voice recording', err);
-      alert('Ma suurtagelin in makarafoonka la dhexgalo. Fadlan ogolow makarafoonka.');
+      setAudioPermissionError(true);
     }
   };
 
@@ -624,6 +626,13 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
               <X className="w-4 h-4" />
             </button>
           </div>
+
+          {audioPermissionError && (
+            <div className="bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 p-2.5 rounded-xl text-[10px] leading-relaxed border border-red-100 dark:border-red-950 shrink-0 mt-2">
+              <p className="font-semibold mb-1">Cilad dhinaca makarafoonka ah!</p>
+              Abka wuxuu ku dhex jiraa shaashad xaddidan (iframe). Si aad codka u duubto, fadlan guji badhanka <strong>"Open in New Tab"</strong> ee ku yaal geeska midig ee kore ee daaqadda AI Studio, ka dibna ogolow makarafoonka.
+            </div>
+          )}
 
           {/* Memos List */}
           <div className="flex-1 overflow-y-auto py-3 space-y-1.5 scrollbar-thin">
