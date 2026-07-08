@@ -1,20 +1,30 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { ChevronLeft, Search, Moon, Sun, Sidebar as SidebarIcon, X } from 'lucide-react';
 import { PdfViewer } from '../components/PdfViewer';
 import { BottomControls } from '../components/BottomControls';
 import { storage } from '../lib/storage';
-import { PdfMetadata } from '../types';
+import { PdfMetadata, PdfDocument } from '../types';
 
 interface ReaderScreenProps {
   pdfId: string;
   onSessionEnd?: (durationSeconds: number) => void;
+  onBack: () => void;
 }
 
-export function ReaderScreen({ pdfId, onSessionEnd }: ReaderScreenProps) {
+export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps) {
   const [fileData, setFileData] = useState<ArrayBuffer | null>(null);
+  const [documentInfo, setDocumentInfo] = useState<PdfDocument | null>(null);
   const [metadata, setMetadata] = useState<PdfMetadata | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [zoom, setZoom] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // New features state
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  
   const sessionStartTime = useRef<number>(Date.now());
 
   useEffect(() => {
@@ -34,9 +44,12 @@ export function ReaderScreen({ pdfId, onSessionEnd }: ReaderScreenProps) {
       setIsLoading(true);
       const data = await storage.getPdfData(pdfId);
       const meta = await storage.getPdfMetadata(pdfId);
+      const library = await storage.getLibrary();
+      const docInfo = library.find(d => d.id === pdfId);
       
       setFileData(data);
       setMetadata(meta);
+      setDocumentInfo(docInfo || null);
       
       // Update the recently viewed timestamp
       await storage.updateLastOpened(pdfId);
@@ -63,6 +76,10 @@ export function ReaderScreen({ pdfId, onSessionEnd }: ReaderScreenProps) {
       return { ...prev, lastPage: newPage };
     });
   }, []);
+  
+  const jumpToPage = useCallback((page: number) => {
+    setMetadata(prev => prev ? { ...prev, lastPage: page } : null);
+  }, []);
 
   const handleToggleBookmark = useCallback(() => {
     setMetadata(prev => {
@@ -79,6 +96,14 @@ export function ReaderScreen({ pdfId, onSessionEnd }: ReaderScreenProps) {
       return { ...prev, bookmarks: newBookmarks };
     });
   }, []);
+  
+  const handleToggleInvertColors = useCallback(() => {
+    setMetadata(prev => prev ? { ...prev, invertColors: !prev.invertColors } : null);
+  }, []);
+  
+  const handleNotesChange = useCallback((notes: string) => {
+    setMetadata(prev => prev ? { ...prev, notes } : null);
+  }, []);
 
   const handleZoomIn = useCallback(() => setZoom(z => Math.min(z + 0.25, 3)), []);
   const handleZoomOut = useCallback(() => setZoom(z => Math.max(z - 0.25, 0.5)), []);
@@ -91,6 +116,15 @@ export function ReaderScreen({ pdfId, onSessionEnd }: ReaderScreenProps) {
   const handlePrevPage = useCallback(() => handlePageChange(-1), [handlePageChange]);
   const handleNextPage = useCallback(() => handlePageChange(1), [handlePageChange]);
 
+  const toggleSearch = () => {
+    setIsSearchOpen(!isSearchOpen);
+    if (!isSearchOpen) {
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    } else {
+      setSearchText(''); // clear on close
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center bg-slate-50 dark:bg-slate-950">
@@ -101,19 +135,90 @@ export function ReaderScreen({ pdfId, onSessionEnd }: ReaderScreenProps) {
 
   if (!fileData || !metadata) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-500">
-        Document not found.
+      <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-500 gap-4">
+        <div>Document not found.</div>
+        <button onClick={onBack} className="px-4 py-2 bg-blue-600 text-white rounded shadow">Go Back</button>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden relative">
+    <div className="flex-1 flex flex-col overflow-hidden relative bg-slate-100 dark:bg-slate-950">
+      {/* Top Controls Bar */}
+      <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm z-20 shrink-0">
+        <div className="flex items-center gap-3 w-1/3">
+          <button 
+            onClick={onBack}
+            className="p-1.5 -ml-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors flex items-center"
+            title="Back to Library"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          
+          <button 
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className={`p-1.5 rounded-md transition-colors ${sidebarOpen ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+            title="Toggle Outline & Notes"
+          >
+            <SidebarIcon className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div className="w-1/3 flex justify-center">
+          <h1 className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate max-w-[200px] md:max-w-[400px]">
+            {documentInfo?.name || 'Document'}
+          </h1>
+        </div>
+        
+        <div className="w-1/3 flex items-center justify-end gap-1 md:gap-2">
+          {isSearchOpen && (
+            <div className="relative flex-1 max-w-[200px] animate-in slide-in-from-right-4 fade-in duration-200">
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search text..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-full pl-3 pr-8 py-1.5 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button 
+                onClick={() => setSearchText('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+          
+          <button 
+            onClick={toggleSearch}
+            className={`p-1.5 rounded-full transition-colors ${isSearchOpen ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+            title="Search text"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+          
+          <button 
+            onClick={handleToggleInvertColors}
+            className={`p-1.5 rounded-full transition-colors ${metadata.invertColors ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+            title="Toggle Night Mode (Invert Colors)"
+          >
+            {metadata.invertColors ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+
       <PdfViewer 
         fileData={fileData}
         currentPage={metadata.lastPage}
         zoom={zoom}
         onLoadSuccess={handleLoadSuccess}
+        searchText={searchText}
+        invertColors={metadata.invertColors}
+        sidebarOpen={sidebarOpen}
+        notes={metadata.notes}
+        onNotesChange={handleNotesChange}
+        onPageChange={jumpToPage}
       />
       
       <BottomControls 

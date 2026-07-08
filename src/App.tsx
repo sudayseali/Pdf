@@ -143,26 +143,28 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans antialiased overflow-hidden transition-colors selection:bg-blue-200 dark:selection:bg-blue-900">
-      <Header 
-        title={getHeaderTitle()}
-        showBack={showBackButton}
-        onBack={handleBack}
-        darkMode={state.darkMode}
-        toggleDarkMode={toggleDarkMode}
-        autoDarkMode={state.autoDarkMode}
-        toggleAutoDarkMode={toggleAutoDarkMode}
-        rightAction={
-          state.currentScreen === 'Library' ? (
-            <button
-              onClick={openSecurityManager}
-              className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors active:scale-95"
-              title="Security Settings"
-            >
-              <Shield className="w-5 h-5" />
-            </button>
-          ) : undefined
-        }
-      />
+      {state.currentScreen !== 'Reader' && (
+        <Header 
+          title={getHeaderTitle()}
+          showBack={showBackButton}
+          onBack={handleBack}
+          darkMode={state.darkMode}
+          toggleDarkMode={toggleDarkMode}
+          autoDarkMode={state.autoDarkMode}
+          toggleAutoDarkMode={toggleAutoDarkMode}
+          rightAction={
+            state.currentScreen === 'Library' ? (
+              <button
+                onClick={openSecurityManager}
+                className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors active:scale-95"
+                title="Security Settings"
+              >
+                <Shield className="w-5 h-5" />
+              </button>
+            ) : undefined
+          }
+        />
+      )}
       
       <main className="flex-1 flex flex-col relative overflow-hidden">
         {state.currentScreen === 'Home' && (
@@ -174,7 +176,7 @@ export default function App() {
         )}
         
         {state.currentScreen === 'Reader' && state.selectedPdfId && (
-          <ReaderScreen pdfId={state.selectedPdfId} onSessionEnd={handleSessionEnd} />
+          <ReaderScreen pdfId={state.selectedPdfId} onSessionEnd={handleSessionEnd} onBack={handleBack} />
         )}
       </main>
 

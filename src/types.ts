@@ -13,6 +13,8 @@ export interface PdfMetadata {
   lastPage: number;
   bookmarks: number[];
   numPages?: number;
+  notes?: string;
+  invertColors?: boolean;
 }
 
 export type Screen = 'Home' | 'Library' | 'Reader';
