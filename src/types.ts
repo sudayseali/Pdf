@@ -24,4 +24,5 @@ export interface AppState {
   selectedPdfId: string | null;
   darkMode: boolean;
   autoDarkMode?: boolean;
+  scrollDirection: 'vertical' | 'horizontal';
 }

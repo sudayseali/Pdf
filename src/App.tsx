@@ -3,11 +3,10 @@ import { Header } from './components/Header';
 import { HomeScreen } from './screens/HomeScreen';
 import { LibraryScreen } from './screens/LibraryScreen';
 import { ReaderScreen } from './screens/ReaderScreen';
-import { SecuritySettings } from './components/SecuritySettings';
+import { SettingsModal } from './components/SettingsModal';
 import { storage } from './lib/storage';
 import { Screen, AppState } from './types';
-import { PdfDocument } from './types';
-import { Shield } from 'lucide-react';
+import { Settings, Lock } from 'lucide-react';
 
 export default function App() {
   const [state, setState] = useState<AppState>({
@@ -15,24 +14,47 @@ export default function App() {
     selectedPdfId: null,
     darkMode: false,
     autoDarkMode: true,
+    scrollDirection: 'horizontal'
   });
 
   const [currentPdfName, setCurrentPdfName] = useState<string>('');
-  const [securityModalOpen, setSecurityModalOpen] = useState(false);
-  const [securityModalMode, setSecurityModalMode] = useState<'verify' | 'manage'>('manage');
+  
+  // Settings Modal state
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [settingsModalMode, setSettingsModalMode] = useState<'verify' | 'manage' | 'verify_app' | 'settings'>('settings');
   const [pendingPdfId, setPendingPdfId] = useState<string | null>(null);
+  
+  // App-wide lock state
+  const [isAppLocked, setIsAppLocked] = useState(true);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+  
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     // Load dark mode preference on boot
-    Promise.all([storage.getDarkMode(), storage.getAutoDarkMode()]).then(([mode, auto]) => {
-      setState(s => ({ ...s, darkMode: mode, autoDarkMode: auto }));
+    Promise.all([
+      storage.getDarkMode(), 
+      storage.getAutoDarkMode(),
+      storage.getScrollDirection()
+    ]).then(([mode, auto, scrollDir]) => {
+      setState(s => ({ ...s, darkMode: mode, autoDarkMode: auto, scrollDirection: scrollDir }));
+    });
+    
+    // Check if app has PIN configured on boot
+    storage.getPin().then(pin => {
+      if (pin) {
+        setSettingsModalMode('verify_app');
+        setSettingsModalOpen(true);
+        setIsAppLocked(true);
+      } else {
+        setIsAppLocked(false);
+      }
+      setIsLoadingAuth(false);
     });
   }, []);
 
   useEffect(() => {
     if (!state.autoDarkMode) return;
-
     const checkTimeForDarkMode = () => {
       const currentHour = new Date().getHours();
       // Assume sunset is 18:00 and sunrise is 06:00
@@ -47,7 +69,6 @@ export default function App() {
         return s;
       });
     };
-
     checkTimeForDarkMode();
     const intervalId = setInterval(checkTimeForDarkMode, 60000);
     return () => clearInterval(intervalId);
@@ -75,14 +96,20 @@ export default function App() {
     storage.setAutoDarkMode(newAuto);
   };
 
+  const toggleScrollDirection = () => {
+    const newDir = state.scrollDirection === 'vertical' ? 'horizontal' : 'vertical';
+    setState(s => ({ ...s, scrollDirection: newDir }));
+    storage.setScrollDirection(newDir);
+  };
+
   const handleNavigate = async (screen: Screen, pdfId?: string, isSensitive?: boolean) => {
     if (screen === 'Reader' && pdfId) {
       if (isSensitive) {
         const pin = await storage.getPin();
-        if (pin) {
+        if (pin && !isAppLocked) {
           setPendingPdfId(pdfId);
-          setSecurityModalMode('verify');
-          setSecurityModalOpen(true);
+          setSettingsModalMode('verify');
+          setSettingsModalOpen(true);
           return;
         }
       }
@@ -98,7 +125,11 @@ export default function App() {
   };
 
   const handleVerifySuccess = () => {
-    if (pendingPdfId) {
+    if (settingsModalMode === 'verify_app') {
+      setIsAppLocked(false);
+      setSettingsModalOpen(false);
+      setSettingsModalMode('settings');
+    } else if (pendingPdfId) {
       setState(s => ({ ...s, currentScreen: 'Reader', selectedPdfId: pendingPdfId }));
       storage.getLibrary().then(lib => {
         const doc = lib.find(d => d.id === pendingPdfId);
@@ -135,14 +166,42 @@ export default function App() {
     else handleNavigate('Home');
   };
 
-  const openSecurityManager = () => {
+  const openSettings = () => {
     setPendingPdfId(null);
-    setSecurityModalMode('manage');
-    setSecurityModalOpen(true);
+    setSettingsModalMode('settings');
+    setSettingsModalOpen(true);
   };
+  
+  if (isLoadingAuth) {
+    return <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+      <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
+    </div>;
+  }
+
+  // If the app is locked, render ONLY the lock screen background and the modal
+  if (isAppLocked) {
+    return (
+      <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-300 dark:text-slate-800 pointer-events-none">
+          <Lock className="w-32 h-32 opacity-20 mb-4" />
+          <p className="text-2xl font-bold opacity-30 tracking-widest uppercase">LexiView PDF</p>
+        </div>
+        <SettingsModal 
+          isOpen={settingsModalOpen}
+          onClose={() => {}}
+          mode="verify_app"
+          onVerifySuccess={handleVerifySuccess}
+          appState={state}
+          onToggleDarkMode={toggleDarkMode}
+          onToggleAutoDarkMode={toggleAutoDarkMode}
+          onToggleScrollDirection={toggleScrollDirection}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans antialiased overflow-hidden transition-colors selection:bg-blue-200 dark:selection:bg-blue-900">
+    <div className="flex flex-col h-[100dvh] w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans antialiased overflow-hidden transition-colors selection:bg-blue-200 dark:selection:bg-blue-900 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       {state.currentScreen !== 'Reader' && (
         <Header 
           title={getHeaderTitle()}
@@ -153,22 +212,20 @@ export default function App() {
           autoDarkMode={state.autoDarkMode}
           toggleAutoDarkMode={toggleAutoDarkMode}
           rightAction={
-            state.currentScreen === 'Library' ? (
-              <button
-                onClick={openSecurityManager}
-                className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors active:scale-95"
-                title="Security Settings"
-              >
-                <Shield className="w-5 h-5" />
-              </button>
-            ) : undefined
+            <button
+              onClick={openSettings}
+              className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors active:scale-95"
+              title="Settings"
+            >
+              <Settings className="w-5 h-5" />
+            </button>
           }
         />
       )}
       
       <main className="flex-1 flex flex-col relative overflow-hidden">
         {state.currentScreen === 'Home' && (
-          <HomeScreen onNavigate={(screen, id) => handleNavigate(screen, id, false)} />
+          <HomeScreen onNavigate={(screen, id, isSensitive) => handleNavigate(screen, id, isSensitive)} />
         )}
         
         {state.currentScreen === 'Library' && (
@@ -176,18 +233,27 @@ export default function App() {
         )}
         
         {state.currentScreen === 'Reader' && state.selectedPdfId && (
-          <ReaderScreen pdfId={state.selectedPdfId} onSessionEnd={handleSessionEnd} onBack={handleBack} />
+          <ReaderScreen 
+            pdfId={state.selectedPdfId} 
+            onSessionEnd={handleSessionEnd} 
+            onBack={handleBack} 
+            scrollDirection={state.scrollDirection}
+          />
         )}
       </main>
 
-      <SecuritySettings 
-        isOpen={securityModalOpen}
+      <SettingsModal 
+        isOpen={settingsModalOpen}
         onClose={() => {
-          setSecurityModalOpen(false);
+          setSettingsModalOpen(false);
           setPendingPdfId(null);
         }}
-        mode={securityModalMode}
+        mode={settingsModalMode}
         onVerifySuccess={handleVerifySuccess}
+        appState={state}
+        onToggleDarkMode={toggleDarkMode}
+        onToggleAutoDarkMode={toggleAutoDarkMode}
+        onToggleScrollDirection={toggleScrollDirection}
       />
 
       {toastMessage && (

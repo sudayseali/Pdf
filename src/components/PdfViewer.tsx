@@ -20,6 +20,7 @@ interface PdfViewerProps {
   notes?: string;
   onNotesChange?: (notes: string) => void;
   onPageChange?: (page: number) => void;
+  scrollDirection?: 'vertical' | 'horizontal';
 }
 
 export const PdfViewer = memo(function PdfViewer({ 
@@ -33,7 +34,8 @@ export const PdfViewer = memo(function PdfViewer({
   sidebarTab: externalSidebarTab,
   notes,
   onNotesChange,
-  onPageChange
+  onPageChange,
+  scrollDirection = 'horizontal'
 }: PdfViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(window.innerWidth);
@@ -72,6 +74,41 @@ export const PdfViewer = memo(function PdfViewer({
       window.removeEventListener('resize', handleResize);
     };
   }, [sidebarOpen]);
+
+  const touchStart = useRef<{x: number, y: number, time: number} | null>(null);
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1 && zoom === 1) { // Only swipe pages if zoom is 1
+      touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, time: Date.now() };
+    } else {
+      touchStart.current = null;
+    }
+  }, [zoom]);
+
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchStart.current || !onPageChange || zoom !== 1) return;
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+    
+    const dx = endX - touchStart.current.x;
+    const dy = endY - touchStart.current.y;
+    const dt = Date.now() - touchStart.current.time;
+    
+    if (dt > 1000) return; // Ignore very slow swipes
+    
+    if (scrollDirection === 'horizontal') {
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
+        if (dx > 0) onPageChange(currentPage - 1);
+        else onPageChange(currentPage + 1);
+      }
+    } else {
+      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 30) {
+        if (dy > 0) onPageChange(currentPage - 1);
+        else onPageChange(currentPage + 1);
+      }
+    }
+    touchStart.current = null;
+  }, [scrollDirection, currentPage, onPageChange, zoom]);
 
   const textRenderer = useCallback((textItem: any) => {
     const str = textItem.str;
@@ -126,7 +163,7 @@ export const PdfViewer = memo(function PdfViewer({
                 className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${internalSidebarTab === 'outline' ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
               >
                 <AlignLeft className="w-4 h-4" />
-                Table of Contents
+                Outline
               </button>
               <button 
                 onClick={() => setInternalSidebarTab('notes')}
@@ -168,11 +205,14 @@ export const PdfViewer = memo(function PdfViewer({
         {/* PDF Page Container */}
         <div 
           ref={containerRef}
-          className={`flex-1 overflow-auto flex flex-col items-center p-4 md:p-8 transition-colors ${invertColors ? 'bg-slate-900' : 'bg-slate-100 dark:bg-slate-950'}`}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          style={{ touchAction: zoom === 1 ? (scrollDirection === 'horizontal' ? 'pan-y' : 'pan-x') : 'auto' }}
+          className={`flex-1 overflow-auto flex flex-col items-center justify-center md:p-4 transition-colors ${invertColors ? 'bg-slate-900' : 'bg-slate-100 dark:bg-slate-950'}`}
         >
           <Page
             pageNumber={currentPage}
-            width={Math.min(containerWidth - 64, 800) * zoom}
+            width={Math.min(containerWidth - (sidebarOpen ? 320 : 0), 800) * zoom}
             className={`shadow-2xl bg-white rounded overflow-hidden transition-all duration-200 transform origin-top ${invertColors ? 'invert hue-rotate-180 brightness-95' : ''}`}
             renderTextLayer={true}
             renderAnnotationLayer={true}

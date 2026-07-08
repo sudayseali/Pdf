@@ -1,17 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ChevronLeft, Search, Moon, Sun, Sidebar as SidebarIcon, X } from 'lucide-react';
+import { ChevronLeft, Search, Sun, Moon, Sidebar as SidebarIcon, X } from 'lucide-react';
 import { PdfViewer } from '../components/PdfViewer';
 import { BottomControls } from '../components/BottomControls';
 import { storage } from '../lib/storage';
-import { PdfMetadata, PdfDocument } from '../types';
+import { PdfDocument, PdfMetadata } from '../types';
 
 interface ReaderScreenProps {
   pdfId: string;
   onSessionEnd?: (durationSeconds: number) => void;
   onBack: () => void;
+  scrollDirection: 'vertical' | 'horizontal';
 }
 
-export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps) {
+export function ReaderScreen({ pdfId, onSessionEnd, onBack, scrollDirection }: ReaderScreenProps) {
   const [fileData, setFileData] = useState<ArrayBuffer | null>(null);
   const [documentInfo, setDocumentInfo] = useState<PdfDocument | null>(null);
   const [metadata, setMetadata] = useState<PdfMetadata | null>(null);
@@ -68,17 +69,12 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
     }
   }, [metadata, pdfId]);
 
-  const handlePageChange = useCallback((delta: number) => {
+  const jumpToPage = useCallback((page: number) => {
     setMetadata(prev => {
       if (!prev) return null;
-      const newPage = prev.lastPage + delta;
-      if (newPage < 1 || (prev.numPages && newPage > prev.numPages)) return prev;
-      return { ...prev, lastPage: newPage };
+      if (page < 1 || (prev.numPages && page > prev.numPages)) return prev;
+      return { ...prev, lastPage: page };
     });
-  }, []);
-  
-  const jumpToPage = useCallback((page: number) => {
-    setMetadata(prev => prev ? { ...prev, lastPage: page } : null);
   }, []);
 
   const handleToggleBookmark = useCallback(() => {
@@ -112,9 +108,6 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
     setNumPages(pages);
     setMetadata(prev => prev ? { ...prev, numPages: pages } : null);
   }, []);
-
-  const handlePrevPage = useCallback(() => handlePageChange(-1), [handlePageChange]);
-  const handleNextPage = useCallback(() => handlePageChange(1), [handlePageChange]);
 
   const toggleSearch = () => {
     setIsSearchOpen(!isSearchOpen);
@@ -219,13 +212,12 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
         notes={metadata.notes}
         onNotesChange={handleNotesChange}
         onPageChange={jumpToPage}
+        scrollDirection={scrollDirection}
       />
       
       <BottomControls 
         currentPage={metadata.lastPage}
         numPages={numPages}
-        onPrevPage={handlePrevPage}
-        onNextPage={handleNextPage}
         zoom={zoom}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
