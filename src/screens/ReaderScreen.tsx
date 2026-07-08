@@ -330,14 +330,6 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          
-          <button 
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className={`p-1.5 rounded-md transition-colors ${sidebarOpen ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
-            title="Toggle Outline"
-          >
-            <SidebarIcon className="w-5 h-5" />
-          </button>
         </div>
         
         <div className="w-[40%] flex justify-center">

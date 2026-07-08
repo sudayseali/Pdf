@@ -18,7 +18,18 @@ export interface PdfMetadata {
   pageTheme?: 'normal' | 'night' | 'sepia' | 'eye-care';
 }
 
-export type Screen = 'Home' | 'Library' | 'Reader';
+export type Screen = 'Home' | 'Library' | 'Reader' | 'Notes';
+
+export interface StandaloneNote {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: number;
+  updatedAt: number;
+  tags: string[];
+  isPinned: boolean;
+  color?: string;
+}
 
 export interface AppState {
   currentScreen: Screen;

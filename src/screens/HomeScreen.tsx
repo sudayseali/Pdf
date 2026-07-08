@@ -1,10 +1,10 @@
 import { useState, useRef, ChangeEvent, useEffect } from 'react';
-import { FileUp, Library, FileText, Lock, Clock } from 'lucide-react';
+import { FileUp, Library, FileText, Lock, Clock, Edit3 } from 'lucide-react';
 import { storage } from '../lib/storage';
-import { PdfDocument } from '../types';
+import { PdfDocument, Screen } from '../types';
 
 interface HomeScreenProps {
-  onNavigate: (screen: 'Library' | 'Reader', pdfId?: string, isSensitive?: boolean) => void;
+  onNavigate: (screen: Screen, pdfId?: string, isSensitive?: boolean) => void;
 }
 
 export function HomeScreen({ onNavigate }: HomeScreenProps) {
@@ -81,6 +81,17 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           >
             <Library className="w-5 h-5" />
             Go to Library
+          </button>
+
+          <button
+            onClick={() => onNavigate('Notes')}
+            className="w-full flex items-center justify-center gap-3 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-3 rounded-md font-semibold text-sm transition-colors active:scale-[0.98] shadow-md relative overflow-hidden group"
+          >
+            <Edit3 className="w-5 h-5" />
+            <span>Xusuus-qor (My Notepad)</span>
+            <span className="absolute top-1 right-1 bg-amber-400 text-slate-900 text-[8px] font-black uppercase px-1 rounded tracking-wider animate-pulse">
+              Cusub
+            </span>
           </button>
         </div>
 

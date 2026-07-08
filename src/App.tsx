@@ -3,6 +3,7 @@ import { Header } from './components/Header';
 import { HomeScreen } from './screens/HomeScreen';
 import { LibraryScreen } from './screens/LibraryScreen';
 import { ReaderScreen } from './screens/ReaderScreen';
+import { NotesScreen } from './screens/NotesScreen';
 import { SettingsModal } from './components/SettingsModal';
 import { storage } from './lib/storage';
 import { Screen, AppState } from './types';
@@ -147,6 +148,7 @@ export default function App() {
       case 'Home': return 'PDF Reader';
       case 'Library': return 'My Library';
       case 'Reader': return currentPdfName || 'Reading';
+      case 'Notes': return 'Xusuus-qor (My Notepad)';
       default: return 'App';
     }
   };
@@ -229,6 +231,10 @@ export default function App() {
             onSessionEnd={handleSessionEnd} 
             onBack={handleBack} 
           />
+        )}
+
+        {state.currentScreen === 'Notes' && (
+          <NotesScreen onBack={handleBack} />
         )}
       </main>
 

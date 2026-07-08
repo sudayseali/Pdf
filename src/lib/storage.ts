@@ -1,5 +1,5 @@
 import localforage from 'localforage';
-import { PdfDocument, PdfMetadata } from '../types';
+import { PdfDocument, PdfMetadata, StandaloneNote } from '../types';
 
 // Storage Instances
 const pdfStore = localforage.createInstance({ name: 'pdf_data', storeName: 'blobs' });
@@ -8,6 +8,7 @@ const libraryStore = localforage.createInstance({ name: 'pdf_library', storeName
 const settingsStore = localforage.createInstance({ name: 'app_settings', storeName: 'prefs' });
 const drawingStore = localforage.createInstance({ name: 'pdf_drawings', storeName: 'drawings' });
 const audioStore = localforage.createInstance({ name: 'pdf_audio_memos', storeName: 'memos' });
+const notesStore = localforage.createInstance({ name: 'app_notes', storeName: 'notes' });
 
 export const storage = {
   // --- Library & File Management ---
@@ -164,5 +165,30 @@ export const storage = {
     const updated = currentMemos.filter(m => m.id !== memoId);
     await audioStore.setItem(`memos_${pdfId}`, updated);
     await audioStore.removeItem(`blob_${memoId}`);
+  },
+
+  // --- Standalone Notes ---
+  async getNotes(): Promise<StandaloneNote[]> {
+    const notes = await notesStore.getItem<StandaloneNote[]>('all_notes');
+    return notes || [];
+  },
+
+  async saveNote(note: StandaloneNote): Promise<StandaloneNote[]> {
+    const notes = await this.getNotes();
+    const index = notes.findIndex(n => n.id === note.id);
+    if (index !== -1) {
+      notes[index] = { ...note, updatedAt: Date.now() };
+    } else {
+      notes.unshift(note);
+    }
+    await notesStore.setItem('all_notes', notes);
+    return notes;
+  },
+
+  async deleteNote(id: string): Promise<StandaloneNote[]> {
+    const notes = await this.getNotes();
+    const filtered = notes.filter(n => n.id !== id);
+    await notesStore.setItem('all_notes', filtered);
+    return filtered;
   }
 };
