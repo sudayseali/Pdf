@@ -148,7 +148,7 @@ export default function App() {
       case 'Home': return 'PDF Reader';
       case 'Library': return 'My Library';
       case 'Reader': return currentPdfName || 'Reading';
-      case 'Notes': return 'Xusuus-qor (My Notepad)';
+      case 'Notes': return 'My Notepad';
       default: return 'App';
     }
   };

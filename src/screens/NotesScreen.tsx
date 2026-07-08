@@ -88,7 +88,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
   const handleSaveActiveNote = async () => {
     if (!editingNote) return;
     
-    const updatedTitle = noteTitle.trim() || 'Xusuus-qor Bilaa Magac Ah';
+    const updatedTitle = noteTitle.trim() || 'Untitled Note';
     const updatedNote: StandaloneNote = {
       ...editingNote,
       title: updatedTitle,
@@ -102,13 +102,13 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
     const updatedList = await storage.saveNote(updatedNote);
     setNotes(updatedList);
     setEditingNote(null);
-    showToast('Xusuus-qorkii si fiican ayaa loo kaydiyay!');
+    showToast('Note saved successfully!');
   };
 
   // Delete a note
   const handleDeleteNote = async (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (!confirm('Ma hubtaa inaad tirtirto xusuus-qorkan?')) return;
+    if (!confirm('Are you sure you want to delete this note?')) return;
     
     const updatedList = await storage.deleteNote(id);
     setNotes(updatedList);
@@ -116,7 +116,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
     if (editingNote?.id === id) {
       setEditingNote(null);
     }
-    showToast('Waa la tirtiray xusuus-qorkii.');
+    showToast('Note deleted.');
   };
 
   // Auto-copy note content
@@ -124,7 +124,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
     if (e) e.stopPropagation();
     navigator.clipboard.writeText(text);
     setCopiedId(id);
-    showToast('Waa la soo koobay qoraalkii!');
+    showToast('Text copied to clipboard!');
     setTimeout(() => setCopiedId(null), 2000);
   };
 
@@ -132,13 +132,13 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
   const handleExportAsTxt = (note: StandaloneNote, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     const element = document.createElement("a");
-    const file = new Blob([`MAGACA: ${note.title}\nLA GUYYEY: ${new Date(note.createdAt).toLocaleString()}\n\n${note.content}`], {type: 'text/plain'});
+    const file = new Blob([`TITLE: ${note.title}\nCREATED: ${new Date(note.createdAt).toLocaleString()}\n\n${note.content}`], {type: 'text/plain'});
     element.href = URL.createObjectURL(file);
     element.download = `${note.title.replace(/\s+/g, '_') || 'note'}.txt`;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
-    showToast('Text file ahaan ayaa loo soo dejiyay!');
+    showToast('Downloaded as TXT file!');
   };
 
   // Tag Helpers in Editor
@@ -193,10 +193,10 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
           <div>
             <h1 className="text-md font-bold text-slate-800 dark:text-white flex items-center gap-2">
               <Notebook className="w-4 h-4 text-indigo-500" />
-              {editingNote ? 'Tifaftirka Xusuus-qorka' : 'Xusuus-qor Casri Ah'}
+              {editingNote ? 'Edit Note' : 'Modern Notepad'}
             </h1>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
-              {editingNote ? 'Wax ka beddel ama ku dar wax cusub' : 'Qor waxyaabaha muhiimka ah'}
+              {editingNote ? 'Edit your note or make changes' : 'Write down anything important'}
             </p>
           </div>
         </div>
@@ -207,7 +207,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
             className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-all active:scale-95 shadow-md"
           >
             <Plus className="w-4 h-4" />
-            <span>Xusuus Cusub</span>
+            <span>New Note</span>
           </button>
         )}
       </div>
@@ -264,7 +264,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                   }`}
                 >
                   <Pin className={`w-3.5 h-3.5 ${noteIsPinned ? 'fill-current' : ''}`} />
-                  <span>Ku gunti (Pin)</span>
+                  <span>Pin Note</span>
                 </button>
               </div>
 
@@ -274,13 +274,13 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                   onClick={() => setEditingNote(null)}
                   className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 >
-                  Ka noqo
+                  Cancel
                 </button>
                 <button
                   onClick={handleSaveActiveNote}
                   className="px-4 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow active:scale-95"
                 >
-                  Kaydi Xusuusta
+                  Save Note
                 </button>
               </div>
             </div>
@@ -293,7 +293,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
               {/* Title input */}
               <input
                 type="text"
-                placeholder="Magaca xusuusta..."
+                placeholder="Note title..."
                 value={noteTitle}
                 onChange={(e) => setNoteTitle(e.target.value)}
                 className="w-full text-xl font-bold bg-transparent border-none focus:outline-none focus:ring-0 text-slate-900 dark:text-white placeholder-slate-400/80"
@@ -303,17 +303,17 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
               <div className="flex items-center gap-3 text-[10px] font-mono text-slate-400 dark:text-slate-500">
                 <div className="flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
-                  <span>{new Date(editingNote.createdAt).toLocaleDateString('so-SO', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  <span>{new Date(editingNote.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                 </div>
                 <span>•</span>
-                <span>{noteContent.trim() === '' ? 0 : noteContent.trim().split(/\s+/).length} Ereyo</span>
+                <span>{noteContent.trim() === '' ? 0 : noteContent.trim().split(/\s+/).length} Words</span>
                 <span>•</span>
-                <span>{noteContent.length} Xarfood</span>
+                <span>{noteContent.length} Chars</span>
               </div>
 
               {/* Text Area */}
               <textarea
-                placeholder="Halkan ku qor faahfaahinta xusuus-qorkaaga cusub..."
+                placeholder="Write your note details here..."
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
                 className="w-full flex-1 resize-none bg-transparent border-none focus:outline-none focus:ring-0 text-sm leading-relaxed text-slate-800 dark:text-slate-200 placeholder-slate-400/80 min-h-[250px]"
@@ -323,13 +323,13 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
               <div className="pt-4 border-t border-slate-200/50 dark:border-slate-800/50 space-y-3">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 dark:text-slate-500">
                   <Tag className="w-3.5 h-3.5" />
-                  <span>Mowduucyada / Tags:</span>
+                  <span>Tags / Categories:</span>
                 </div>
 
                 {/* Selected Tags list */}
                 <div className="flex flex-wrap gap-1.5">
                   {noteTags.length === 0 ? (
-                    <span className="text-[11px] italic text-slate-400">Ma jiraan wax tag ah oo lagu daray</span>
+                    <span className="text-[11px] italic text-slate-400">No tags added yet</span>
                   ) : (
                     noteTags.map(tag => (
                       <span 
@@ -370,7 +370,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                   <div className="flex gap-1.5 max-w-xs">
                     <input
                       type="text"
-                      placeholder="Ku dar tag kale..."
+                      placeholder="Add another tag..."
                       value={newTagInput}
                       onChange={(e) => setNewTagInput(e.target.value)}
                       onKeyDown={(e) => {
@@ -385,7 +385,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                       onClick={() => handleAddTag(newTagInput)}
                       className="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md text-[10px] font-bold transition-colors"
                     >
-                      Ku dar
+                      Add
                     </button>
                   </div>
                 </div>
@@ -408,7 +408,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Ka raadi magaca ama qoraalka xusuusta..."
+                  placeholder="Search notes by title or content..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs focus:outline-none focus:border-indigo-500 text-slate-800 dark:text-slate-200 transition-colors"
@@ -426,7 +426,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
               {/* Tags Horizontal Scroll Filter */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none shrink-0">
                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap uppercase tracking-wider">
-                  Mowduucyada:
+                  Tags:
                 </span>
                 
                 <button
@@ -437,7 +437,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
-                  Dhamaan ({notes.length})
+                  All ({notes.length})
                 </button>
 
                 {allExistingTags.map(tag => {
@@ -470,12 +470,12 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                      {searchQuery || selectedTag ? 'Eber natiijo!' : 'Ma jiraan wax xusuus ah!'}
+                      {searchQuery || selectedTag ? 'No results!' : 'No notes yet!'}
                     </h3>
                     <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 max-w-xs mx-auto">
                       {searchQuery || selectedTag 
-                        ? 'Ma jiro xusuus-qor ku habboon filtarka aad dooratay. Fadlan isku day hadal kale.' 
-                        : 'Wali ma qorin wax xusuus-qor ah. Riix badhanka sare si aad u bilowdo xusuus-qor qurux badan!'}
+                        ? 'No notes match your selected filter. Please try a different search query.' 
+                        : 'You haven\'t written any notes yet. Click the button above to start a beautiful note!'}
                     </p>
                   </div>
                   {!searchQuery && !selectedTag && (
@@ -484,7 +484,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                       className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow active:scale-95 flex items-center gap-1.5"
                     >
                       <Plus className="w-4 h-4" />
-                      Qor tii ugu horraysay
+                      Create your first note
                     </button>
                   )}
                 </div>
@@ -504,7 +504,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                         {/* Pinned Marker / Top Header */}
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <h4 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                            {note.title || 'Xusuus aan la magacaabin'}
+                            {note.title || 'Untitled Note'}
                           </h4>
                           <div className="flex items-center gap-1 shrink-0">
                             {note.isPinned && (
@@ -515,7 +515,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
 
                         {/* Note Body Excerpt */}
                         <p className="text-xs text-slate-500 dark:text-slate-400/90 line-clamp-3 mb-4 leading-relaxed flex-1">
-                          {note.content || <em className="text-slate-400/70">Maran... ku dar faahfaahin</em>}
+                          {note.content || <em className="text-slate-400/70">Empty... add details</em>}
                         </p>
 
                         {/* Note Tags (Small list) */}
@@ -538,7 +538,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                         {/* Note Footer: Actions & Date */}
                         <div className="flex items-center justify-between pt-2.5 border-t border-slate-200/40 dark:border-slate-800/40 text-[10px] text-slate-400 font-mono mt-auto shrink-0">
                           <span>
-                            {new Date(note.updatedAt).toLocaleDateString('so-SO', { month: 'short', day: 'numeric' })}
+                            {new Date(note.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                           </span>
                           
                           {/* Quick utility actions on hover / mobile */}
@@ -564,7 +564,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                             <button
                               onClick={(e) => handleDeleteNote(note.id, e)}
                               className="p-1 hover:bg-red-100 dark:hover:bg-red-950/40 rounded text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
-                              title="Tirtir"
+                              title="Delete"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>

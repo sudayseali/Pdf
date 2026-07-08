@@ -88,9 +88,9 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             className="w-full flex items-center justify-center gap-3 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-3 rounded-md font-semibold text-sm transition-colors active:scale-[0.98] shadow-md relative overflow-hidden group"
           >
             <Edit3 className="w-5 h-5" />
-            <span>Xusuus-qor (My Notepad)</span>
+            <span>My Notepad</span>
             <span className="absolute top-1 right-1 bg-amber-400 text-slate-900 text-[8px] font-black uppercase px-1 rounded tracking-wider animate-pulse">
-              Cusub
+              New
             </span>
           </button>
         </div>
