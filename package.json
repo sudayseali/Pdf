@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "generate-icons": "npx capacitor-assets generate --android && npx cap sync android"
   },
   "dependencies": {
     "@capacitor/core": "^8.4.1",
