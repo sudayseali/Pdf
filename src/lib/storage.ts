@@ -129,6 +129,48 @@ export const storage = {
     }
   },
 
+  // --- Offline Reading Statistics & Habits ---
+  async getReadingStats(): Promise<{ totalTime: number; streak: number; lastActive: string; pageFlips: number }> {
+    const totalTime = await settingsStore.getItem<number>('stats_total_time') ?? 0;
+    const streak = await settingsStore.getItem<number>('stats_streak') ?? 0;
+    const lastActive = await settingsStore.getItem<string>('stats_last_active') ?? '';
+    const pageFlips = await settingsStore.getItem<number>('stats_page_flips') ?? 0;
+    return { totalTime, streak, lastActive, pageFlips };
+  },
+
+  async incrementReadingStats(durationSeconds: number) {
+    const stats = await this.getReadingStats();
+    const newTotalTime = stats.totalTime + durationSeconds;
+    await settingsStore.setItem('stats_total_time', newTotalTime);
+
+    // Calculate streak
+    const todayStr = new Date().toDateString();
+    let newStreak = stats.streak;
+
+    if (stats.lastActive !== todayStr) {
+      if (stats.lastActive) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toDateString();
+
+        if (stats.lastActive === yesterdayStr) {
+          newStreak += 1;
+        } else {
+          newStreak = 1; // reset streak if gap exists
+        }
+      } else {
+        newStreak = 1; // first day
+      }
+      await settingsStore.setItem('stats_streak', newStreak);
+      await settingsStore.setItem('stats_last_active', todayStr);
+    }
+  },
+
+  async incrementPageFlips() {
+    const flips = await settingsStore.getItem<number>('stats_page_flips') ?? 0;
+    await settingsStore.setItem('stats_page_flips', flips + 1);
+  },
+
   // --- Drawings & Ink Annotations ---
   async getPageDrawings(pdfId: string, pageNumber: number): Promise<any[]> {
     const drawings = await drawingStore.getItem<any[]>(`drawings_${pdfId}_${pageNumber}`);

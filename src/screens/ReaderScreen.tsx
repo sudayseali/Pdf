@@ -254,7 +254,14 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
   const jumpToPage = useCallback((page: number) => {
     setMetadata(prev => {
       if (!prev) return null;
+      if (page === prev.lastPage) return prev; // No-op if it's the same page
       if (page < 1 || (prev.numPages && page > prev.numPages)) return prev;
+      
+      // Increment offline page flips
+      storage.incrementPageFlips().catch(err => {
+        console.error('Failed to increment page flips:', err);
+      });
+      
       return { ...prev, lastPage: page };
     });
   }, []);
@@ -329,6 +336,14 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
             title="Back to Library"
           >
             <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          <button 
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className={`p-1.5 rounded-full transition-colors ${sidebarOpen ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+            title="Qoraalka Cutubyada (Table of Contents)"
+          >
+            <SidebarIcon className="w-4 h-4" />
           </button>
         </div>
         

@@ -134,6 +134,11 @@ export default function App() {
   };
 
   const handleSessionEnd = (durationSeconds: number) => {
+    // Record session duration in the offline stats database
+    storage.incrementReadingStats(durationSeconds).catch(err => {
+      console.error('Failed to update reading stats:', err);
+    });
+
     const minutes = Math.floor(durationSeconds / 60);
     const seconds = durationSeconds % 60;
     const timeStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
