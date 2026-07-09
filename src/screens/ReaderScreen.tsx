@@ -337,14 +337,6 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-
-          <button 
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className={`p-1.5 rounded-full transition-colors ${sidebarOpen ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
-            title="Qoraalka Cutubyada (Table of Contents)"
-          >
-            <SidebarIcon className="w-4 h-4" />
-          </button>
         </div>
         
         <div className="w-[40%] flex justify-center">
@@ -389,7 +381,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
               setDrawingTool(nextMode ? 'pen' : 'none');
             }}
             className={`p-1.5 rounded-full transition-colors ${isDrawingMode ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
-            title="Qalinka & Calaamadeeyaha (S-Pen)"
+            title="Pen & Highlighter (S-Pen)"
           >
             <Pen className="w-4 h-4" />
           </button>
@@ -398,7 +390,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
           <button 
             onClick={() => setIsAudioPanelOpen(!isAudioPanelOpen)}
             className={`p-1.5 rounded-full transition-colors ${isAudioPanelOpen ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
-            title="Cod-Xusuuseed (Voice Recording)"
+            title="Voice Memo"
           >
             <Mic className="w-4 h-4" />
           </button>
@@ -411,7 +403,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
               handleThemeChange(themes[nextIndex]);
             }}
             className="p-1.5 rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1"
-            title="Beddel Muuqaalka Bogga (Reading Theme)"
+            title="Change Page Theme"
           >
             {pageTheme === 'normal' && <Sun className="w-4 h-4 text-slate-500" />}
             {pageTheme === 'sepia' && <Palette className="w-4 h-4 text-amber-500 animate-in spin-in-12 duration-300" />}
@@ -466,10 +458,10 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
                   ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400 ring-2 ring-amber-500/30 font-bold'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
-              title="Qalin adag"
+              title="Solid Pen"
             >
               <Pen className="w-3.5 h-3.5" />
-              <span>Qalinka</span>
+              <span>Pen</span>
             </button>
 
             {/* Pen Quick Colors */}
@@ -515,10 +507,10 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
                   ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400 ring-2 ring-amber-500/30 font-bold'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
-              title="Calaamadeeye qoraal"
+              title="Text Highlighter"
             >
               <Highlighter className="w-3.5 h-3.5" />
-              <span>Calaamadeeyaha</span>
+              <span>Highlighter</span>
             </button>
 
             {/* Highlighter Colors */}
@@ -570,10 +562,10 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
                   ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400 ring-2 ring-amber-500/30 font-bold'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
-              title="Tirtiraha sawirrada"
+              title="Drawing Eraser"
             >
               <Eraser className="w-3.5 h-3.5" />
-              <span>Tirtiraha</span>
+              <span>Eraser</span>
             </button>
           </div>
 
@@ -582,20 +574,20 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
             <button
               onClick={() => canvasRefs.current[metadata.lastPage]?.undo()}
               className="p-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-1 text-xs"
-              title="Ka noqo sawirkii u dambeeyay"
+              title="Undo last stroke"
             >
               <Undo className="w-4 h-4" />
-              <span className="hidden md:inline">Ka noqo</span>
+              <span className="hidden md:inline">Undo</span>
             </button>
 
             {/* Clear page */}
             <button
               onClick={() => canvasRefs.current[metadata.lastPage]?.clear()}
               className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors flex items-center gap-1 text-xs"
-              title="Tirtir dhammaan sawirrada bogga"
+              title="Clear all page drawings"
             >
               <Trash2 className="w-4 h-4" />
-              <span className="hidden md:inline">Eber</span>
+              <span className="hidden md:inline">Clear</span>
             </button>
             
             <span className="h-6 w-[1px] bg-slate-200 dark:bg-slate-800 mx-1" />
@@ -609,7 +601,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
               className="px-3 py-1.5 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-lg transition-all flex items-center gap-1.5 shadow-sm"
             >
               <Check className="w-3.5 h-3.5" />
-              <span>Kaydi</span>
+              <span>Save</span>
             </button>
           </div>
         </div>
@@ -637,7 +629,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
           {audioPermissionError && (
             <div className="bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 p-2.5 rounded-xl text-[10px] leading-relaxed border border-red-100 dark:border-red-950 shrink-0 mt-2">
               <p className="font-semibold mb-1">Microphone Error!</p>
-              The app is running inside a restricted iframe. To record audio, please click the <strong>"Open in New Tab"</strong> button in the upper right corner of AI Studio, and then allow microphone access.
+              The app is running inside a restricted frame or mobile preview. If recording fails, please click "Open in New Tab" to launch the standalone SilentPDF reader and allow microphone access.
             </div>
           )}
 
