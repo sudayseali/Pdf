@@ -4,6 +4,7 @@ import { HomeScreen } from './screens/HomeScreen';
 import { LibraryScreen } from './screens/LibraryScreen';
 import { ReaderScreen } from './screens/ReaderScreen';
 import { NotesScreen } from './screens/NotesScreen';
+import { FlashcardsScreen } from './screens/FlashcardsScreen';
 import { SettingsModal } from './components/SettingsModal';
 import { storage } from './lib/storage';
 import { Screen, AppState } from './types';
@@ -255,6 +256,10 @@ export default function App() {
 
         {state.currentScreen === 'Notes' && (
           <NotesScreen onBack={handleBack} />
+        )}
+
+        {state.currentScreen === 'Flashcards' && (
+          <FlashcardsScreen onBack={handleBack} />
         )}
       </main>
 

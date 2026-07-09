@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ChevronLeft, Search, Sun, Moon, Sidebar as SidebarIcon, X, FileText, Pen, Highlighter, Eraser, Undo, Mic, Play, Pause, Trash2, Check, Square, Palette, Layers } from 'lucide-react';
+import { ChevronLeft, Search, Sun, Moon, Sidebar as SidebarIcon, X, FileText, Pen, Highlighter, Eraser, Undo, Mic, Play, Pause, Trash2, Check, Square, Palette, Layers, Volume2 } from 'lucide-react';
 import { PdfViewer } from '../components/PdfViewer';
 import { BottomControls } from '../components/BottomControls';
 import { storage } from '../lib/storage';
@@ -56,6 +56,15 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingIntervalRef = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // TTS & Study Notes State
+  const [isTtsPanelOpen, setIsTtsPanelOpen] = useState(false);
+  const [ttsText, setTtsText] = useState('');
+  const [isTtsSpeaking, setIsTtsSpeaking] = useState(false);
+  const [isTtsPaused, setIsTtsPaused] = useState(false);
+  const [ttsSpeed, setTtsSpeed] = useState(1);
+  const [ttsVoice, setTtsVoice] = useState<SpeechSynthesisVoice | null>(null);
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   useEffect(() => {
     sessionStartTime.current = Date.now();
@@ -129,6 +138,88 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
       }
     };
   }, [pdfId]);
+
+  // Load Speech Voices on boot
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      const loadVoices = () => {
+        const voices = window.speechSynthesis.getVoices();
+        setAvailableVoices(voices);
+        const engVoice = voices.find(v => v.lang.startsWith('en') || v.default);
+        if (engVoice) setTtsVoice(engVoice);
+      };
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, []);
+
+  // Update TTS text when page changes, loads the typed page notes
+  useEffect(() => {
+    if (metadata) {
+      setTtsText(metadata.notes || '');
+    }
+  }, [metadata?.lastPage, metadata?.notes]);
+
+  const handleSavePageNotes = () => {
+    setMetadata(prev => {
+      if (!prev) return null;
+      return { ...prev, notes: ttsText };
+    });
+  };
+
+  const handleTtsPlay = () => {
+    if (!('speechSynthesis' in window)) {
+      alert('Text-to-Speech is not supported in this browser.');
+      return;
+    }
+
+    if (isTtsPaused) {
+      window.speechSynthesis.resume();
+      setIsTtsSpeaking(true);
+      setIsTtsPaused(false);
+      return;
+    }
+
+    window.speechSynthesis.cancel(); // Stop current speech first
+
+    const textToSpeak = ttsText.trim() || `Kani waa bogga ${metadata?.lastPage || 1}. Ma jiraan wax qoraal cashar ah oo aad halkan ku qoratay. Fadlan halkan ku qor wax kasta si aan kuugu akhriyo!`;
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    
+    if (ttsVoice) {
+      utterance.voice = ttsVoice;
+    }
+    utterance.rate = ttsSpeed;
+    
+    utterance.onend = () => {
+      setIsTtsSpeaking(false);
+      setIsTtsPaused(false);
+    };
+
+    utterance.onerror = () => {
+      setIsTtsSpeaking(false);
+      setIsTtsPaused(false);
+    };
+
+    window.speechSynthesis.speak(utterance);
+    setIsTtsSpeaking(true);
+    setIsTtsPaused(false);
+  };
+
+  const handleTtsPause = () => {
+    if ('speechSynthesis' in window && isTtsSpeaking) {
+      window.speechSynthesis.pause();
+      setIsTtsSpeaking(false);
+      setIsTtsPaused(true);
+    }
+  };
+
+  const handleTtsStop = () => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setIsTtsSpeaking(false);
+      setIsTtsPaused(false);
+    }
+  };
 
   // Page Theme Changer helper
   const handleThemeChange = (theme: 'normal' | 'night' | 'sepia' | 'eye-care') => {
@@ -388,11 +479,26 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
 
           {/* Voice Memo button */}
           <button 
-            onClick={() => setIsAudioPanelOpen(!isAudioPanelOpen)}
+            onClick={() => {
+              setIsAudioPanelOpen(!isAudioPanelOpen);
+              setIsTtsPanelOpen(false); // close TTS panel if open
+            }}
             className={`p-1.5 rounded-full transition-colors ${isAudioPanelOpen ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
             title="Voice Memo"
           >
             <Mic className="w-4 h-4" />
+          </button>
+
+          {/* TTS & Study Notes button */}
+          <button 
+            onClick={() => {
+              setIsTtsPanelOpen(!isTtsPanelOpen);
+              setIsAudioPanelOpen(false); // close audio panel if open
+            }}
+            className={`p-1.5 rounded-full transition-colors ${isTtsPanelOpen ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+            title="Qoraalka & Cod ku Akhris"
+          >
+            <Volume2 className="w-4 h-4" />
           </button>
 
           {/* Cyclical Page Theme button */}
@@ -716,6 +822,126 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Text-To-Speech & Page Study Notes Panel */}
+      {isTtsPanelOpen && (
+        <div className="absolute bottom-28 left-1/2 -translate-x-1/2 w-[92%] max-w-sm bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-30 flex flex-col p-4 animate-in slide-in-from-bottom-8 fade-in duration-200 max-h-[420px]">
+          <div className="flex items-center justify-between pb-2.5 border-b border-slate-200 dark:border-slate-800 shrink-0">
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-xs">
+              <Volume2 className="w-4 h-4 text-blue-500" />
+              <span>Qoraalka Bogga & Cod</span>
+            </h3>
+            <button 
+              onClick={() => {
+                handleTtsStop();
+                setIsTtsPanelOpen(false);
+              }}
+              className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto py-2.5 space-y-3.5 scrollbar-thin">
+            <div>
+              <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                Qoraalka Casharka (Page Notes)
+              </label>
+              <textarea
+                value={ttsText}
+                onChange={(e) => setTtsText(e.target.value)}
+                placeholder="Ku qor ama halkan ku soo koob casharka bogaan si cod ahaan laguugu akhriyo..."
+                className="w-full text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-slate-800 dark:text-slate-200"
+                rows={4}
+              />
+            </div>
+
+            {/* Voice Selectors & Speed Options */}
+            <div className="space-y-2">
+              {availableVoices.length > 0 && (
+                <div>
+                  <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                    Nooca Codka (Voice)
+                  </label>
+                  <select
+                    value={ttsVoice?.name || ''}
+                    onChange={(e) => {
+                      const selected = availableVoices.find(v => v.name === e.target.value);
+                      if (selected) setTtsVoice(selected);
+                    }}
+                    className="w-full text-[10px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded px-1.5 py-1 text-slate-700 dark:text-slate-300 focus:outline-none"
+                  >
+                    {availableVoices.slice(0, 15).map(v => (
+                      <option key={v.name} value={v.name}>{v.name} ({v.lang})</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  Xawaaraha (Speed: {ttsSpeed}x)
+                </label>
+                <div className="flex gap-1.5">
+                  {[0.75, 1, 1.25, 1.5, 2].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setTtsSpeed(s)}
+                      className={`text-[10px] flex-1 py-1 rounded font-bold border transition-colors ${
+                        ttsSpeed === s
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-100'
+                      }`}
+                    >
+                      {s}x
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Controls Footer */}
+          <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2.5 shrink-0">
+            <button
+              onClick={handleSavePageNotes}
+              className="px-3 py-2 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition-colors flex items-center gap-1"
+            >
+              <Check className="w-3 h-3 text-emerald-500" />
+              Kaydi Qoraalka
+            </button>
+
+            <div className="flex gap-1.5">
+              {isTtsSpeaking ? (
+                <button
+                  onClick={handleTtsPause}
+                  className="px-3.5 py-2 text-[10px] font-bold bg-amber-500 hover:bg-amber-600 text-white rounded-lg flex items-center gap-1 shadow-sm"
+                >
+                  <Pause className="w-3 h-3 fill-current" />
+                  Haye
+                </button>
+              ) : (
+                <button
+                  onClick={handleTtsPlay}
+                  className="px-3.5 py-2 text-[10px] font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-1 shadow-sm"
+                >
+                  <Play className="w-3 h-3 fill-current" />
+                  Dhageyso
+                </button>
+              )}
+
+              <button
+                onClick={handleTtsStop}
+                disabled={!isTtsSpeaking && !isTtsPaused}
+                className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 rounded-lg disabled:opacity-40"
+                title="Stop speech"
+              >
+                <Square className="w-3 h-3 fill-current" />
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -1,5 +1,5 @@
 import localforage from 'localforage';
-import { PdfDocument, PdfMetadata, StandaloneNote } from '../types';
+import { PdfDocument, PdfMetadata, StandaloneNote, Flashcard } from '../types';
 
 // Storage Instances
 const pdfStore = localforage.createInstance({ name: 'pdf_data', storeName: 'blobs' });
@@ -9,6 +9,7 @@ const settingsStore = localforage.createInstance({ name: 'app_settings', storeNa
 const drawingStore = localforage.createInstance({ name: 'pdf_drawings', storeName: 'drawings' });
 const audioStore = localforage.createInstance({ name: 'pdf_audio_memos', storeName: 'memos' });
 const notesStore = localforage.createInstance({ name: 'app_notes', storeName: 'notes' });
+const flashcardStore = localforage.createInstance({ name: 'app_flashcards', storeName: 'flashcards' });
 
 export const storage = {
   // --- Library & File Management ---
@@ -231,6 +232,31 @@ export const storage = {
     const notes = await this.getNotes();
     const filtered = notes.filter(n => n.id !== id);
     await notesStore.setItem('all_notes', filtered);
+    return filtered;
+  },
+
+  // --- Flashcards (Active Recall Study System) ---
+  async getFlashcards(): Promise<Flashcard[]> {
+    const cards = await flashcardStore.getItem<Flashcard[]>('all_cards');
+    return cards || [];
+  },
+
+  async saveFlashcard(card: Flashcard): Promise<Flashcard[]> {
+    const cards = await this.getFlashcards();
+    const index = cards.findIndex(c => c.id === card.id);
+    if (index !== -1) {
+      cards[index] = card;
+    } else {
+      cards.unshift(card);
+    }
+    await flashcardStore.setItem('all_cards', cards);
+    return cards;
+  },
+
+  async deleteFlashcard(id: string): Promise<Flashcard[]> {
+    const cards = await this.getFlashcards();
+    const filtered = cards.filter(c => c.id !== id);
+    await flashcardStore.setItem('all_cards', filtered);
     return filtered;
   }
 };

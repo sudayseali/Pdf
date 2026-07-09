@@ -18,7 +18,17 @@ export interface PdfMetadata {
   pageTheme?: 'normal' | 'night' | 'sepia' | 'eye-care';
 }
 
-export type Screen = 'Home' | 'Library' | 'Reader' | 'Notes';
+export type Screen = 'Home' | 'Library' | 'Reader' | 'Notes' | 'Flashcards';
+
+export interface Flashcard {
+  id: string;
+  front: string;
+  back: string;
+  box: number; // 1 to 5 for Leitner system
+  category: string;
+  createdAt: number;
+  lastReviewed?: number;
+}
 
 export interface StandaloneNote {
   id: string;

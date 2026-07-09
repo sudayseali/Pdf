@@ -1,5 +1,5 @@
 import { useState, useRef, ChangeEvent, useEffect } from 'react';
-import { FileUp, Library, Lock, Clock, Edit3 } from 'lucide-react';
+import { FileUp, Library, Lock, Clock, Edit3, Layers, Flame } from 'lucide-react';
 import { storage } from '../lib/storage';
 import { PdfDocument, Screen } from '../types';
 import { AppLogo } from '../components/AppLogo';
@@ -11,12 +11,21 @@ interface HomeScreenProps {
 export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const [isImporting, setIsImporting] = useState(false);
   const [recentDocs, setRecentDocs] = useState<PdfDocument[]>([]);
+  const [readingStats, setReadingStats] = useState({ totalTime: 0, streak: 0, lastActive: '', pageFlips: 0 });
+  const [dailyGoal, setDailyGoal] = useState(() => {
+    const saved = localStorage.getItem('daily_reading_goal');
+    return saved ? parseInt(saved, 10) : 10;
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     storage.getLibrary().then(docs => {
       const sorted = [...docs].sort((a, b) => (b.lastOpenedAt || b.addedAt) - (a.lastOpenedAt || a.addedAt));
       setRecentDocs(sorted.slice(0, 3));
+    });
+
+    storage.getReadingStats().then(stats => {
+      setReadingStats(stats);
     });
   }, []);
 
@@ -42,9 +51,12 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
     }
   };
 
+  const activeMins = Math.floor(readingStats.totalTime / 60);
+  const goalPercentage = Math.min(Math.round((activeMins / dailyGoal) * 100), 100);
+
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 bg-slate-50 dark:bg-slate-950 transition-colors">
-      <div className="w-full max-w-sm space-y-8">
+      <div className="w-full max-w-sm space-y-6">
         
         {/* Logo / Header Area */}
         <div className="text-center space-y-4">
@@ -52,6 +64,84 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           <div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white">SilentPDF</h2>
             <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mt-2">Pro Document Reader</p>
+          </div>
+        </div>
+
+        {/* Study Progress & Habit Tracker Card */}
+        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              Heerka Akhriska & Hab-dhaqanka (Study Habit)
+            </h3>
+            {readingStats.streak > 0 && (
+              <div className="flex items-center gap-1 bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-full text-[10px] font-black">
+                <Flame className="w-3.5 h-3.5 fill-current text-orange-500 animate-pulse" />
+                <span>{readingStats.streak} MAALMOOD</span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 space-y-1">
+              <div className="flex items-baseline gap-1 text-slate-800 dark:text-white">
+                <span className="text-xl font-black">{activeMins}</span>
+                <span className="text-xs text-slate-500">daqiiqo maanta</span>
+              </div>
+              
+              <div className="text-[10px] text-slate-400 font-medium">
+                Hadafka: {dailyGoal} daqiiqo.
+                <button 
+                  onClick={() => {
+                    const newGoal = prompt('Geli hadafkaaga akhris ee maalin laha ah (daqiiqo):', String(dailyGoal));
+                    if (newGoal && !isNaN(Number(newGoal))) {
+                      const g = parseInt(newGoal, 10);
+                      setDailyGoal(g);
+                      localStorage.setItem('daily_reading_goal', String(g));
+                    }
+                  }}
+                  className="text-blue-500 hover:underline ml-1.5 font-bold"
+                >
+                  Bedel
+                </button>
+              </div>
+            </div>
+
+            <div className="relative w-12 h-12 shrink-0 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle
+                  cx="24"
+                  cy="24"
+                  r="20"
+                  className="stroke-slate-100 dark:stroke-slate-800"
+                  strokeWidth="4"
+                  fill="transparent"
+                />
+                <circle
+                  cx="24"
+                  cy="24"
+                  r="20"
+                  className="stroke-blue-500 dark:stroke-blue-400"
+                  strokeWidth="4"
+                  fill="transparent"
+                  strokeDasharray={125.6}
+                  strokeDashoffset={125.6 - (125.6 * (goalPercentage || 1)) / 100}
+                />
+              </svg>
+              <span className="absolute text-[9px] font-black font-mono text-slate-700 dark:text-slate-300">
+                {goalPercentage}%
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-blue-500" />
+              <span>Waqtiga: {Math.round(readingStats.totalTime / 60)}m</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Boggaga: {readingStats.pageFlips || 0} rogay</span>
+            </div>
           </div>
         </div>
 
@@ -90,6 +180,17 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             <span>My Notepad</span>
             <span className="absolute top-1 right-1 bg-amber-400 text-slate-900 text-[8px] font-black uppercase px-1 rounded tracking-wider animate-pulse">
               New
+            </span>
+          </button>
+
+          <button
+            onClick={() => onNavigate('Flashcards')}
+            className="w-full flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-3 rounded-md font-semibold text-sm transition-colors active:scale-[0.98] shadow-md relative overflow-hidden group"
+          >
+            <Layers className="w-5 h-5" />
+            <span>Kaararka Darasada</span>
+            <span className="absolute top-1 right-1 bg-yellow-300 text-slate-900 text-[8px] font-black uppercase px-1.5 rounded tracking-wider animate-bounce">
+              Leitner
             </span>
           </button>
         </div>

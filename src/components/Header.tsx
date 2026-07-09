@@ -27,7 +27,7 @@ export function Header({ title, showBack, onBack, darkMode, toggleDarkMode, auto
         )}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
-             <span className="text-white font-bold text-sm">LV</span>
+             <span className="text-white font-bold text-sm">SP</span>
           </div>
           <h1 className="text-lg font-bold leading-tight text-slate-900 dark:text-white truncate">
             {title}
