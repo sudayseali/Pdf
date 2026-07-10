@@ -229,7 +229,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
           <div>
             <h1 className="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2 font-display tracking-tight">
               <Notebook className="w-5 h-5 text-indigo-500" />
-              {editingNote ? 'Edit Note' : 'Qoraallada (Notepad)'}
+              {editingNote ? 'Edit Note' : 'Notes'}
             </h1>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black font-mono uppercase tracking-widest mt-0.5">
               {editingNote ? 'Make changes' : 'Write down anything important'}
@@ -243,7 +243,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-[1.25rem] transition-all duration-200 shadow-md hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Qoraal Cusub (New)</span>
+            <span className="hidden sm:inline">New Note</span>
           </button>
         )}
       </div>
@@ -567,8 +567,8 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                     </h3>
                     <p className="text-sm font-medium text-slate-400 dark:text-slate-500 mt-2 max-w-sm mx-auto">
                       {searchQuery || selectedTag 
-                        ? 'Wax qoraal ah oo la mid ah baaritaankaaga ma jiraan.' 
-                        : 'Weli wax qoraal ah ma aadan qorin. Guji badhanka sare si aad u bilowdo!'}
+                        ? 'No notes match your search.' 
+                        : 'No notes yet. Click the button above to start!'}
                     </p>
                   </div>
                   {!searchQuery && !selectedTag && (
@@ -577,7 +577,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                       className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold px-5 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 flex items-center gap-2 cursor-pointer mt-4"
                     >
                       <Plus className="w-4 h-4" />
-                      Qoraalkaaga ugu horeeya (First Note)
+                      Create your first note
                     </button>
                   )}
                 </div>

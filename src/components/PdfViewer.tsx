@@ -164,10 +164,14 @@ export const PdfViewer = memo(function PdfViewer({
   // Calculate a responsive width with padding so the PDF doesn't stick to the edges
   const maxWidth = containerWidth - (sidebarOpen ? 320 : 0);
 
+  const documentFile = useMemo(() => {
+    return { data: fileData };
+  }, [fileData]);
+
   return (
     <div className="flex-1 flex overflow-hidden w-full h-full relative">
       <Document
-        file={fileData}
+        file={documentFile}
         options={documentOptions}
         onLoadSuccess={(pdf) => {
           setNumPages(pdf.numPages);

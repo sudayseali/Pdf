@@ -56,7 +56,7 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
     const finalFront = frontText.trim();
     const finalBack = backText.trim();
     if (!finalFront || !finalBack) {
-      setErrorMsg('Fadlan geli su'+"'aal iyo jawaabba.");
+      setErrorMsg("Please enter both a question and an answer.");
       return;
     }
 
@@ -82,13 +82,13 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
       setIsAdding(false);
     } catch (err) {
       console.error(err);
-      setErrorMsg('Wuu fashilmay kaydinta kaarka.');
+      setErrorMsg('Failed to save card.');
     }
   };
 
   const handleDeleteCard = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm('Ma hubtaa inaad tirtirto kaarkan darasada?')) return;
+    if (!confirm('Are you sure you want to delete this flashcard?')) return;
     try {
       const updated = await storage.deleteFlashcard(id);
       setCards(updated);
@@ -110,7 +110,7 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
     }
     
     if (pool.length === 0) {
-      alert("Ma haysid wax kaarar ah oo aad ku tababarato qaybtaan. Fadlan ku dar kaarar cusub marka hore!");
+      alert("You don't have any cards to study in this category. Please add some first!");
       return;
     }
 
@@ -181,7 +181,7 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
           </button>
           <div>
             <h1 className="text-lg font-black text-slate-900 dark:text-white font-display tracking-tight">
-              {isStudying ? 'Imtixaanka Kaararka' : 'Kaararka Darasada'}
+              {isStudying ? 'Flashcard Quiz' : 'Study Flashcards'}
             </h1>
             <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black font-mono">
               {isStudying ? 'Active Recall Mode' : 'Leitner Study Box'}
@@ -195,7 +195,7 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
             className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl flex items-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg hover:shadow-blue-500/20 active:scale-95"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Kaar Cusub</span>
+            <span className="hidden sm:inline">New Card</span>
           </button>
         )}
       </div>
@@ -210,7 +210,7 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
                 <div className="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-xl">
                   <Sparkles className="w-5 h-5 text-amber-500" />
                 </div>
-                Ku dar Kaar Tababar
+                Add Flashcard
               </h2>
               <button onClick={() => setIsAdding(false)} className="p-2 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer">
                 <X className="w-5 h-5" />
@@ -221,11 +221,11 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
               <div className="space-y-4">
                 <div>
                   <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 font-mono">
-                    Dhanka Hore: Erayga ama Su'aasha
+                    Front: Word or Question
                   </label>
                   <textarea
                     required
-                    placeholder="Geli kelmada ama su'aasha aad rabto inaad xafiddo..."
+                    placeholder="Enter the word or question you want to memorize..."
                     value={frontText}
                     onChange={e => setFrontText(e.target.value)}
                     className="w-full text-sm font-semibold bg-slate-50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl p-4 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:text-white transition-all resize-none shadow-sm placeholder:font-medium placeholder:text-slate-400 dark:placeholder:text-slate-600"
@@ -235,11 +235,11 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
 
                 <div>
                   <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 font-mono">
-                    Dhanka Dambe: Micnaha ama Jawaabta
+                    Back: Meaning or Answer
                   </label>
                   <textarea
                     required
-                    placeholder="Geli micnaha, jawaabta ama qeexitaanka saxda ah..."
+                    placeholder="Enter the correct meaning, answer or definition..."
                     value={backText}
                     onChange={e => setBackText(e.target.value)}
                     className="w-full text-sm font-semibold bg-slate-50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl p-4 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:text-white transition-all resize-none shadow-sm placeholder:font-medium placeholder:text-slate-400 dark:placeholder:text-slate-600"
@@ -251,7 +251,7 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 font-mono">
-                    Qaybta (Category)
+                    Category
                   </label>
                   <select
                     value={cardCategory}
@@ -266,11 +266,11 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
 
                 <div>
                   <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 font-mono">
-                    Ama Qayb Cusub
+                    Or New Category
                   </label>
                   <input
                     type="text"
-                    placeholder="Qor qayb kale..."
+                    placeholder="Type another category..."
                     value={customCategory}
                     onChange={e => setCustomCategory(e.target.value)}
                     className="w-full text-sm font-bold bg-slate-50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-700/80 rounded-xl p-3.5 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:text-white transition-all shadow-sm placeholder:font-medium placeholder:text-slate-400 dark:placeholder:text-slate-600"
@@ -291,13 +291,13 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
                   onClick={() => setIsAdding(false)}
                   className="px-5 py-3 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-bold transition-all cursor-pointer"
                 >
-                  Ka noqo
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="px-6 py-3 text-sm text-white bg-blue-600 hover:bg-blue-500 font-bold rounded-xl shadow-md hover:shadow-lg hover:shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
                 >
-                  Kaydi Kaarka
+                  Save Card
                 </button>
               </div>
             </form>
@@ -311,13 +311,13 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
             {/* Study Progress Header */}
             <div className="flex items-center justify-between mb-6">
               <span className="text-[11px] font-black font-mono text-slate-500 dark:text-slate-400 uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg shadow-sm">
-                Kaarka {currentIndex + 1} / {studyCards.length}
+                Card {currentIndex + 1} / {studyCards.length}
               </span>
               <div className="flex items-center gap-3">
                 {sessionStreak > 1 && (
                   <div className="flex items-center gap-1.5 text-amber-500 bg-amber-50 dark:bg-amber-950/30 px-3 py-1.5 rounded-lg text-[11px] font-bold border border-amber-200 dark:border-amber-900/50 shadow-sm">
                     <Flame className="w-4 h-4 fill-current animate-bounce" />
-                    <span>{sessionStreak} guul</span>
+                    <span>{sessionStreak} streak</span>
                   </div>
                 )}
                 <span className="text-[11px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-800/50 shadow-sm">
@@ -356,7 +356,7 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
                 {/* CARD FRONT */}
                 <div className="absolute inset-0 backface-hidden p-8 flex flex-col justify-between rounded-[2rem]">
                   <div className="flex items-center justify-between text-[11px] font-black text-slate-400 uppercase tracking-widest font-mono">
-                    <span>SU'AASHA / ERAYGA</span>
+                    <span>QUESTION / TERM</span>
                     <span className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 px-3 py-1 rounded-lg text-slate-500">
                       {studyCards[currentIndex]?.category}
                     </span>
@@ -369,14 +369,14 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
                   </div>
 
                   <div className="text-center text-xs font-bold text-slate-400 bg-slate-50 dark:bg-slate-800/50 py-3 rounded-xl">
-                    Guji kaarka si aad u aragto jawaabta ↺
+                    Tap card to see answer ↺
                   </div>
                 </div>
 
                 {/* CARD BACK */}
                 <div className="absolute inset-0 backface-hidden rotate-y-180 p-8 flex flex-col justify-between rounded-[2rem] bg-blue-50/30 dark:bg-slate-900/90 border border-blue-100/50 dark:border-blue-900/30">
                   <div className="flex items-center justify-between text-[11px] font-black text-slate-400 uppercase tracking-widest font-mono">
-                    <span>JAWAABTA / MICNAHA</span>
+                    <span>ANSWER / MEANING</span>
                     <span className="bg-blue-100 dark:bg-blue-900/50 px-3 py-1 rounded-lg text-blue-600 dark:text-blue-400 font-bold">
                       Flipped
                     </span>
@@ -389,7 +389,7 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
                   </div>
 
                   <div className="text-center text-xs font-bold text-slate-500 bg-white dark:bg-slate-800 py-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
-                    Qiimee sida aad ugu xafidnayd kaarkan ↓
+                    Rate how well you knew this ↓
                   </div>
                 </div>
 
@@ -405,8 +405,8 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
                     className="flex flex-col items-center justify-center gap-1.5 p-4 rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:hover:bg-red-900/40 text-red-700 dark:text-red-400 transition-all cursor-pointer shadow-sm active:scale-95"
                   >
                     <X className="w-6 h-6 text-red-500" />
-                    <span className="text-xs font-black tracking-tight">Aad u Adag</span>
-                    <span className="text-[10px] font-bold opacity-70">Box 1 u celi</span>
+                    <span className="text-xs font-black tracking-tight">Very Hard</span>
+                    <span className="text-[10px] font-bold opacity-70">Reset to Box 1</span>
                   </button>
 
                   <button
@@ -414,8 +414,8 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
                     className="flex flex-col items-center justify-center gap-1.5 p-4 rounded-2xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-400 transition-all cursor-pointer shadow-sm active:scale-95"
                   >
                     <HelpCircle className="w-6 h-6 text-amber-500" />
-                    <span className="text-xs font-black tracking-tight">Noolow</span>
-                    <span className="text-[10px] font-bold opacity-70">Kuna celi Box</span>
+                    <span className="text-xs font-black tracking-tight">Okay</span>
+                    <span className="text-[10px] font-bold opacity-70">Keep in Box</span>
                   </button>
 
                   <button
@@ -423,8 +423,8 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
                     className="flex flex-col items-center justify-center gap-1.5 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 transition-all cursor-pointer shadow-sm active:scale-95"
                   >
                     <Check className="w-6 h-6 text-emerald-500" />
-                    <span className="text-xs font-black tracking-tight">Waan Aqaan</span>
-                    <span className="text-[10px] font-bold opacity-70">Sare u qaad</span>
+                    <span className="text-xs font-black tracking-tight">I Know It</span>
+                    <span className="text-[10px] font-bold opacity-70">Level Up</span>
                   </button>
                 </div>
               ) : (
@@ -433,7 +433,7 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
                   className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-sm shadow-md hover:shadow-lg hover:shadow-blue-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
                 >
                   <RotateCcw className="w-5 h-5" />
-                  Guji si aad u fujiso (Show Answer)
+                  Show Answer
                 </button>
               )}
               
@@ -441,7 +441,7 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
                 onClick={() => { setIsStudying(false); loadCards(); }}
                 className="w-full py-3 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl text-xs font-bold text-center transition-all cursor-pointer border border-slate-200 dark:border-slate-800 shadow-sm"
               >
-                Ka Bax Tababarka
+                Exit Session
               </button>
             </div>
 
@@ -457,7 +457,7 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
                   <Layers className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono mb-1">Dhammaan</p>
+                  <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono mb-1">Total</p>
                   <p className="text-2xl font-black text-slate-800 dark:text-white font-display tracking-tight">{cards.length}</p>
                 </div>
               </div>
@@ -467,7 +467,7 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
                   <BookOpen className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono mb-1">Xafidan</p>
+                  <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono mb-1">Memorized</p>
                   <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-display tracking-tight">
                     {cards.filter(c => c.box >= 4).length}
                   </p>
@@ -513,14 +513,14 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
                 className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2.5 mb-8 active:scale-[0.98] transition-all duration-200 cursor-pointer hover:opacity-90"
               >
                 <Sparkles className="w-5 h-5 text-amber-400 dark:text-amber-500 animate-pulse" />
-                Ku cil-celi: Baro Qaybta ({activeCategory})
+                Start Review: Category ({activeCategory})
               </button>
             )}
 
             {/* Lists of Cards */}
             <div className="flex-1 overflow-y-auto space-y-3 pb-24 pr-1">
               <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4 font-mono pl-1">
-                Qoraalka Kaararka ({filteredCards.length})
+                Flashcard List ({filteredCards.length})
               </h3>
               
               {filteredCards.length === 0 ? (
@@ -528,12 +528,12 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
                   <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                     <HelpCircle className="w-8 h-8 text-slate-300 dark:text-slate-600" />
                   </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 font-bold mb-2">Wax kaarar ah kuma jiraan qaybtaan.</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 font-bold mb-2">No cards in this category.</p>
                   <button 
                     onClick={() => setIsAdding(true)}
                     className="text-xs text-blue-600 dark:text-blue-400 font-black hover:underline tracking-widest uppercase cursor-pointer"
                   >
-                    Hada ku dar
+                    Add one now
                   </button>
                 </div>
               ) : (
@@ -566,7 +566,7 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
                     <button
                       onClick={(e) => handleDeleteCard(card.id, e)}
                       className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all cursor-pointer opacity-0 group-hover:opacity-100"
-                      title="Tirtir kaarka"
+                      title="Delete card"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

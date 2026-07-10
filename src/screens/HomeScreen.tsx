@@ -64,7 +64,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           Notification.requestPermission().then(permission => {
             if (permission === 'granted') {
               new Notification('Hambalyo! (Goal Reached!)', {
-                body: `Waxaad gaartay hadafkaagii akhriska ee maanta oo ahaa ${dailyGoal} daqiiqo. (You reached your daily goal of ${dailyGoal} minutes!)`,
+                body: `You reached your daily goal of ${dailyGoal} minutes!`,
               });
               localStorage.setItem('daily_goal_notified_date', today);
             }
@@ -101,12 +101,12 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           
           <div className="flex items-center justify-between relative z-10">
             <h3 className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-sans">
-              Heerka Akhriska & Hab-dhaqanka
+              Study & Habit Tracker
             </h3>
             {readingStats.streak > 0 && (
               <div className="flex items-center gap-1.5 bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 px-3 py-1.5 rounded-xl text-[10px] font-black tracking-wider shadow-sm border border-orange-100 dark:border-orange-900/30">
                 <Flame className="w-3.5 h-3.5 fill-current text-orange-500 animate-pulse" />
-                <span>{readingStats.streak} MAALMOOD</span>
+                <span>{readingStats.streak} DAYS</span>
               </div>
             )}
           </div>
@@ -115,14 +115,14 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             <div className="flex-1 space-y-2">
               <div className="flex items-baseline gap-1.5 text-slate-800 dark:text-white">
                 <span className="text-4xl font-black font-display tracking-tight">{activeMins}</span>
-                <span className="text-sm text-slate-500 font-semibold">daqiiqo maanta</span>
+                <span className="text-sm text-slate-500 font-semibold">minutes today</span>
               </div>
               
               <div className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
                 Hadafka: <span className="font-bold text-slate-600 dark:text-slate-300">{dailyGoal}m</span>.
                 <button 
                   onClick={() => {
-                    const newGoal = prompt('Geli hadafkaaga akhris ee maalin laha ah (daqiiqo):', String(dailyGoal));
+                    const newGoal = prompt('Enter your daily reading goal (minutes):', String(dailyGoal));
                     if (newGoal && !isNaN(Number(newGoal))) {
                       const g = parseInt(newGoal, 10);
                       setDailyGoal(g);
@@ -167,11 +167,11 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80 text-[10px] font-bold text-slate-500 dark:text-slate-400 font-mono relative z-10">
             <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950/40 p-2 rounded-xl border border-slate-100 dark:border-slate-800/50">
               <Clock className="w-4 h-4 text-blue-500" />
-              <span>Waqtiga: {Math.round(readingStats.totalTime / 60)}m</span>
+              <span>Time: {Math.round(readingStats.totalTime / 60)}m</span>
             </div>
             <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950/40 p-2 rounded-xl border border-slate-100 dark:border-slate-800/50">
               <Layers className="w-4 h-4 text-emerald-500" />
-              <span>Boggaga: {readingStats.pageFlips || 0} rogay</span>
+              <span>Pages: {readingStats.pageFlips || 0} flipped</span>
             </div>
           </div>
         </div>
@@ -188,9 +188,9 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
                 <FileUp className="w-6 h-6 text-white" />
               </div>
               <div className="text-left">
-                <span className="block font-black text-lg tracking-wide">Soo Rogo PDF</span>
+                <span className="block font-black text-lg tracking-wide">Import PDF</span>
                 <span className="block text-[11px] font-semibold text-blue-100 opacity-90 font-mono mt-0.5">
-                  {isImporting ? 'Faylka waa la soo rabaa...' : 'Ka soo qaad qalabkaaga (Device)'}
+                  {isImporting ? 'Importing file...' : 'Load from your device'}
                 </span>
               </div>
             </div>
@@ -214,7 +214,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl group-hover:scale-110 transition-transform duration-300 mb-3 text-blue-500 dark:text-blue-400">
               <Library className="w-5 h-5" />
             </div>
-            <span className="font-bold text-sm">Maktabadda</span>
+            <span className="font-bold text-sm">Library</span>
           </button>
 
           <button
@@ -224,7 +224,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl group-hover:scale-110 transition-transform duration-300 mb-3 text-indigo-500 dark:text-indigo-400">
               <Edit3 className="w-5 h-5" />
             </div>
-            <span className="font-bold text-sm">Qoraallada</span>
+            <span className="font-bold text-sm">Notes</span>
             <span className="absolute top-4 right-4 bg-amber-400 text-slate-950 text-[9px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider shadow-sm">
               New
             </span>
@@ -239,8 +239,8 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
                 <Layers className="w-5 h-5" />
               </div>
               <div className="text-left">
-                <span className="block font-bold text-sm">Kaararka Darasada</span>
-                <span className="block text-[11px] font-medium text-slate-500 mt-0.5">La soco xifdintaada (Flashcards)</span>
+                <span className="block font-bold text-sm">Study Flashcards</span>
+                <span className="block text-[11px] font-medium text-slate-500 mt-0.5">Track your memorization</span>
               </div>
             </div>
             <span className="bg-yellow-300/20 text-yellow-600 dark:text-yellow-400 text-[9px] font-black uppercase px-2 py-1 rounded-lg tracking-wider font-mono border border-yellow-400/30">
@@ -252,7 +252,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         {recentDocs.length > 0 && (
           <div className="w-full pt-3">
             <h3 className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4 font-mono">
-              Faylashii ugu dambeeyay
+              Recent Documents
             </h3>
             <div className="space-y-3">
               {recentDocs.map(doc => (

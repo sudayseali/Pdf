@@ -182,7 +182,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
 
     window.speechSynthesis.cancel(); // Stop current speech first
 
-    const textToSpeak = ttsText.trim() || `Kani waa bogga ${metadata?.lastPage || 1}. Ma jiraan wax qoraal cashar ah oo aad halkan ku qoratay. Fadlan halkan ku qor wax kasta si aan kuugu akhriyo!`;
+    const textToSpeak = ttsText.trim() || `This is page ${metadata?.lastPage || 1}. You haven't added any notes here yet. Please write something so I can read it for you!`;
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     
     if (ttsVoice) {
@@ -252,7 +252,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
 
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const memoTitle = newMemoTitle.trim() || `Cod-xusuuseed Bogga ${metadata?.lastPage || 1}`;
+        const memoTitle = newMemoTitle.trim() || `Audio Memo Page ${metadata?.lastPage || 1}`;
         const newMemo = {
           id: crypto.randomUUID(),
           name: memoTitle,
@@ -326,7 +326,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
   };
 
   const deleteMemo = async (memoId: string) => {
-    if (window.confirm('Ma hubtaa inaad tirtirto cod-xusuuseedkan?')) {
+    if (window.confirm('Are you sure you want to delete this voice memo?')) {
       if (activePlaybackId === memoId && audioRef.current) {
         audioRef.current.pause();
         setActivePlaybackId(null);
@@ -519,7 +519,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
                 setIsAudioPanelOpen(false); // close audio panel if open
               }}
               className={`p-2 rounded-xl transition-all cursor-pointer ${isTtsPanelOpen ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:bg-white dark:text-slate-400 dark:hover:bg-slate-700 hover:shadow-sm'}`}
-              title="Qoraalka & Cod ku Akhris"
+              title="Notes & Text-to-Speech"
             >
               <Volume2 className="w-4 h-4" />
             </button>
@@ -858,7 +858,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
           <div className="flex items-center justify-between pb-2.5 border-b border-slate-200 dark:border-slate-800 shrink-0">
             <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-xs">
               <Volume2 className="w-4 h-4 text-blue-500" />
-              <span>Qoraalka Bogga & Cod</span>
+              <span>Page Notes & TTS</span>
             </h3>
             <button 
               onClick={() => {
@@ -874,12 +874,12 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
           <div className="flex-1 overflow-y-auto py-2.5 space-y-3.5 scrollbar-thin">
             <div>
               <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                Qoraalka Casharka (Page Notes)
+                Page Notes
               </label>
               <textarea
                 value={ttsText}
                 onChange={(e) => setTtsText(e.target.value)}
-                placeholder="Ku qor ama halkan ku soo koob casharka bogaan si cod ahaan laguugu akhriyo..."
+                placeholder="Type or paste your study notes here to have them read out loud..."
                 className="w-full text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-slate-800 dark:text-slate-200"
                 rows={4}
               />
@@ -890,7 +890,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
               {availableVoices.length > 0 && (
                 <div>
                   <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                    Nooca Codka (Voice)
+                    Voice Type
                   </label>
                   <select
                     value={ttsVoice?.name || ''}
@@ -909,7 +909,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
 
               <div>
                 <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                  Xawaaraha (Speed: {ttsSpeed}x)
+                  Speed: {ttsSpeed}x
                 </label>
                 <div className="flex gap-1.5">
                   {[0.75, 1, 1.25, 1.5, 2].map((s) => (
@@ -937,7 +937,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
               className="px-3 py-2 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition-colors flex items-center gap-1"
             >
               <Check className="w-3 h-3 text-emerald-500" />
-              Kaydi Qoraalka
+              Save Notes
             </button>
 
             <div className="flex gap-1.5">
@@ -947,7 +947,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
                   className="px-3.5 py-2 text-[10px] font-bold bg-amber-500 hover:bg-amber-600 text-white rounded-lg flex items-center gap-1 shadow-sm"
                 >
                   <Pause className="w-3 h-3 fill-current" />
-                  Haye
+                  Pause
                 </button>
               ) : (
                 <button
@@ -955,7 +955,7 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
                   className="px-3.5 py-2 text-[10px] font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-1 shadow-sm"
                 >
                   <Play className="w-3 h-3 fill-current" />
-                  Dhageyso
+                  Play
                 </button>
               )}
 

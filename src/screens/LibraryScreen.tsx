@@ -320,12 +320,12 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
           {/* Document List/Grid */}
           <div className="space-y-4">
             <h2 className="text-[11px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono">
-              {searchQuery || selectedTagFilter ? 'Natiijada Baaritaanka (Search Results)' : 'Khaanadda PDF-yada (Your Library)'}
+              {searchQuery || selectedTagFilter ? 'Search Results' : 'Your Library'}
             </h2>
             
             {filteredAndSortedDocuments.length === 0 ? (
               <div className="text-center py-16 text-sm font-medium text-slate-500 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 border-dashed shadow-sm">
-                Wax dukumiinti ah oo la helay ma jiraan.
+                No documents found.
               </div>
             ) : (
               <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5' : 'flex flex-col gap-3.5'}>

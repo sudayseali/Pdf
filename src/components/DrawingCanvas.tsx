@@ -81,7 +81,7 @@ export const DrawingCanvas = forwardRef<DrawingCanvasHandle, DrawingCanvasProps>
     },
     clear() {
       if (strokes.length === 0) return;
-      if (window.confirm('Miyaad hubtaa inaad tirtirto dhammaan sawirrada boggan?')) {
+      if (window.confirm('Are you sure you want to clear all drawings on this page?')) {
         setStrokes([]);
         storage.clearPageDrawings(pdfId, pageNumber);
       }
