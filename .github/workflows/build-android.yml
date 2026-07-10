@@ -58,7 +58,18 @@ jobs:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
         run: |
           echo "Setting up keystore..."
-          echo $KEYSTORE_BASE64 | base64 --decode > app/release.keystore
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "Error: KEYSTORE_BASE64 secret is empty or not set!"
+            exit 1
+          fi
+          
+          # Clean and decode base64 robustly
+          echo "$KEYSTORE_BASE64" | tr -d '\r\n ' | base64 --decode > app/release.keystore
+          # Copy to root directory just in case Gradle resolves relatively from root project
+          cp app/release.keystore release.keystore
+          
+          echo "Verifying keystore creation..."
+          ls -lh app/release.keystore
           
           echo "Building release APK & AAB..."
           mkdir -p gradle/wrapper
