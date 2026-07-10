@@ -63,24 +63,45 @@ jobs:
             exit 1
           fi
           
-          # Clean and decode base64 robustly
-          echo "$KEYSTORE_BASE64" | tr -d '\r\n ' | base64 --decode > app/release.keystore
+          # Decode base64 robustly using Python to prevent any shell/encoding issues
+          python3 -c "
+import os, base64
+keystore_b64 = os.environ.get('KEYSTORE_BASE64', '')
+if not keystore_b64.strip():
+    print('Error: KEYSTORE_BASE64 env var is empty!')
+    exit(1)
+try:
+    decoded = base64.b64decode(keystore_b64.strip())
+    os.makedirs('app', exist_ok=True)
+    with open('app/release.keystore', 'wb') as f:
+        f.write(decoded)
+    print('Keystore successfully decoded and written to app/release.keystore')
+except Exception as e:
+    print('Failed to decode KEYSTORE_BASE64:', e)
+    exit(1)
+"
+          
           # Copy to root directory just in case Gradle resolves relatively from root project
           cp app/release.keystore release.keystore
           
           echo "Verifying keystore creation..."
           ls -lh app/release.keystore
           
+          # Append signing configuration to gradle.properties for 100% robust and secure injection.
+          # This avoids any bash shell-escaping issues with passwords containing special characters (like $, !, etc.)
+          echo "Writing signing configuration to gradle.properties..."
+          echo "" >> gradle.properties
+          echo "android.injected.signing.store.file=$GITHUB_WORKSPACE/android/app/release.keystore" >> gradle.properties
+          echo "android.injected.signing.store.password=$STORE_PASSWORD" >> gradle.properties
+          echo "android.injected.signing.key.alias=$KEY_ALIAS" >> gradle.properties
+          echo "android.injected.signing.key.password=$KEY_PASSWORD" >> gradle.properties
+          
           echo "Building release APK & AAB..."
           mkdir -p gradle/wrapper
           curl -L https://raw.githubusercontent.com/gradle/gradle/v8.14.3/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
           chmod +x gradlew
           
-          ./gradlew assembleRelease bundleRelease \
-            -Pandroid.injected.signing.store.file=release.keystore \
-            -Pandroid.injected.signing.store.password=$STORE_PASSWORD \
-            -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
-            -Pandroid.injected.signing.key.password=$KEY_PASSWORD
+          ./gradlew assembleRelease bundleRelease
 
       - name: Upload Release Artifacts
         uses: actions/upload-artifact@v4
