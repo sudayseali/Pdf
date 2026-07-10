@@ -3,6 +3,7 @@ import { X, Lock, Shield, Key, AlertCircle, Moon, Sun, Monitor, Settings, Databa
 import { storage } from '../lib/storage';
 import { backupEngine } from '../lib/backup';
 import { AppState } from '../types';
+import { ConfirmModal } from './ConfirmModal';
 
 export interface SettingsModalProps {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export function SettingsModal({
   const [backupMessage, setBackupMessage] = useState('');
   const [restoreMessage, setRestoreMessage] = useState('');
   const [restoreError, setRestoreError] = useState('');
+  const [showRemovePinConfirm, setShowRemovePinConfirm] = useState(false);
 
   // Fetch stats when settings open or tab is statistics
   const loadStats = async () => {
@@ -55,12 +57,34 @@ export function SettingsModal({
       setIsBackingUp(true);
       setBackupMessage('Compiling backup data...');
       const data = await backupEngine.generateBackup(full);
-      
-      const file = new Blob([JSON.stringify(data)], { type: 'application/json' });
+      const jsonString = JSON.stringify(data);
+      const suffix = full ? 'full' : 'light';
+      const fileName = `silentpdf_backup_${suffix}_${new Date().toISOString().split('T')[0]}.json`;
+
+      if (navigator.share) {
+        try {
+          const file = new File([jsonString], fileName, { type: 'application/json' });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: `SilentPDF Backup (${suffix})`,
+              text: `Backup created on ${new Date().toLocaleDateString()}`
+            });
+            setBackupMessage('Backup shared successfully!');
+            setTimeout(() => setBackupMessage(''), 3000);
+            return;
+          }
+        } catch (err) {
+          console.warn('Backup share failed or was canceled', err);
+          // Fallback to standard download
+        }
+      }
+
+      // Standard browser download fallback
+      const file = new Blob([jsonString], { type: 'application/json' });
       const element = document.createElement("a");
       element.href = URL.createObjectURL(file);
-      const suffix = full ? 'full' : 'light';
-      element.download = `silentpdf_backup_${suffix}_${new Date().toISOString().split('T')[0]}.json`;
+      element.download = fileName;
       document.body.appendChild(element);
       element.click();
       document.body.removeChild(element);
@@ -193,12 +217,15 @@ export function SettingsModal({
     }
   };
 
-  const handleRemovePin = async () => {
-    if (window.confirm('Are you sure you want to remove the PIN? Your app will be unprotected.')) {
-      await storage.setPin(null);
-      setSavedPin(null);
-      setStep('settings');
-    }
+  const handleRemovePin = () => {
+    setShowRemovePinConfirm(true);
+  };
+
+  const handleConfirmRemovePin = async () => {
+    await storage.setPin(null);
+    setSavedPin(null);
+    setShowRemovePinConfirm(false);
+    setStep('settings');
   };
 
   if (!isOpen) return null;
@@ -550,6 +577,18 @@ export function SettingsModal({
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showRemovePinConfirm}
+        title="Remove Security PIN?"
+        message="Are you sure you want to remove the security PIN? Your app and all sensitive documents will no longer be protected by a passcode."
+        confirmText="Remove PIN"
+        cancelText="Keep Protected"
+        type="danger"
+        onConfirm={handleConfirmRemovePin}
+        onCancel={() => setShowRemovePinConfirm(false)}
+      />
+
     </div>
   );
 }

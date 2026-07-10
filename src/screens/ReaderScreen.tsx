@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ChevronLeft, Search, Sun, Moon, Sidebar as SidebarIcon, X, FileText, Pen, Highlighter, Eraser, Undo, Mic, Play, Pause, Trash2, Check, Square, Palette, Layers, Volume2 } from 'lucide-react';
+import { ChevronLeft, Search, Sun, Moon, Sidebar as SidebarIcon, X, FileText, Pen, Highlighter, Eraser, Undo, Mic, Play, Pause, Trash2, Check, Square, Palette, Layers, Volume2, AlertCircle } from 'lucide-react';
 import { PdfViewer } from '../components/PdfViewer';
 import { BottomControls } from '../components/BottomControls';
 import { storage } from '../lib/storage';
 import { PdfDocument, PdfMetadata } from '../types';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 interface ReaderScreenProps {
   pdfId: string;
@@ -65,6 +66,8 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
   const [ttsSpeed, setTtsSpeed] = useState(1);
   const [ttsVoice, setTtsVoice] = useState<SpeechSynthesisVoice | null>(null);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [deleteMemoPendingId, setDeleteMemoPendingId] = useState<string | null>(null);
+  const [ttsErrorMessage, setTtsErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     sessionStartTime.current = Date.now();
@@ -169,7 +172,8 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
 
   const handleTtsPlay = () => {
     if (!('speechSynthesis' in window)) {
-      alert('Text-to-Speech is not supported in this browser.');
+      setTtsErrorMessage('Text-to-Speech is not supported on this device or WebView.');
+      setTimeout(() => setTtsErrorMessage(null), 4000);
       return;
     }
 
@@ -325,15 +329,19 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
     }
   };
 
-  const deleteMemo = async (memoId: string) => {
-    if (window.confirm('Are you sure you want to delete this voice memo?')) {
-      if (activePlaybackId === memoId && audioRef.current) {
-        audioRef.current.pause();
-        setActivePlaybackId(null);
-      }
-      await storage.deleteAudioMemo(pdfId, memoId);
-      loadAudioMemos();
+  const deleteMemo = (memoId: string) => {
+    setDeleteMemoPendingId(memoId);
+  };
+
+  const handleConfirmDeleteMemo = async () => {
+    if (!deleteMemoPendingId) return;
+    if (activePlaybackId === deleteMemoPendingId && audioRef.current) {
+      audioRef.current.pause();
+      setActivePlaybackId(null);
     }
+    await storage.deleteAudioMemo(pdfId, deleteMemoPendingId);
+    setDeleteMemoPendingId(null);
+    loadAudioMemos();
   };
 
   const formatDuration = (seconds: number) => {
@@ -871,6 +879,13 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
             </button>
           </div>
 
+          {ttsErrorMessage && (
+            <div className="bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 p-2.5 rounded-xl text-[10px] font-bold flex items-center gap-2 border border-amber-100 dark:border-amber-900/50 mt-2 shrink-0">
+              <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
+              <span>{ttsErrorMessage}</span>
+            </div>
+          )}
+
           <div className="flex-1 overflow-y-auto py-2.5 space-y-3.5 scrollbar-thin">
             <div>
               <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">
@@ -971,6 +986,18 @@ export function ReaderScreen({ pdfId, onSessionEnd, onBack }: ReaderScreenProps)
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={deleteMemoPendingId !== null}
+        title="Delete Voice Memo"
+        message="Are you sure you want to permanently delete this voice memo from your device? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        onConfirm={handleConfirmDeleteMemo}
+        onCancel={() => setDeleteMemoPendingId(null)}
+      />
+
     </div>
   );
 }

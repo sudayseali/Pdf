@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { storage } from '../lib/storage';
 import { Flashcard } from '../types';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 interface FlashcardsScreenProps {
   onBack: () => void;
@@ -23,6 +24,8 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
   const [cardCategory, setCardCategory] = useState('General');
   const [customCategory, setCustomCategory] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [deletePendingId, setDeletePendingId] = useState<string | null>(null);
+  const [sessionWarning, setSessionWarning] = useState<string | null>(null);
 
   // Study session state
   const [isStudying, setIsStudying] = useState(false);
@@ -86,19 +89,25 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
     }
   };
 
-  const handleDeleteCard = async (id: string, e: React.MouseEvent) => {
+  const handleDeleteCard = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm('Are you sure you want to delete this flashcard?')) return;
+    setDeletePendingId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletePendingId) return;
     try {
-      const updated = await storage.deleteFlashcard(id);
+      const updated = await storage.deleteFlashcard(deletePendingId);
       setCards(updated);
       
       // If we are studying, adjust the session
       if (isStudying) {
-        setStudyCards(prev => prev.filter(c => c.id !== id));
+        setStudyCards(prev => prev.filter(c => c.id !== deletePendingId));
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setDeletePendingId(null);
     }
   };
 
@@ -110,10 +119,12 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
     }
     
     if (pool.length === 0) {
-      alert("You don't have any cards to study in this category. Please add some first!");
+      setSessionWarning("You don't have any cards to study in this category. Please add some first!");
+      setTimeout(() => setSessionWarning(null), 4000);
       return;
     }
 
+    setSessionWarning(null);
     // Shuffle pool
     const shuffled = pool.sort(() => Math.random() - 0.5);
     setStudyCards(shuffled);
@@ -507,6 +518,13 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
             )}
 
             {/* Launch Study Button */}
+            {sessionWarning && (
+              <div className="bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 p-4 rounded-xl text-xs font-bold flex items-center gap-2.5 border border-amber-100 dark:border-amber-900/50 mb-4">
+                <AlertCircle className="w-5 h-5" />
+                {sessionWarning}
+              </div>
+            )}
+
             {cards.length > 0 && (
               <button
                 onClick={() => startStudySession(activeCategory)}
@@ -589,6 +607,18 @@ export function FlashcardsScreen({ onBack }: FlashcardsScreenProps) {
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
+
+      <ConfirmModal
+        isOpen={deletePendingId !== null}
+        title="Delete Flashcard"
+        message="Are you sure you want to delete this flashcard from your study deck? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeletePendingId(null)}
+      />
+
     </div>
   );
 }

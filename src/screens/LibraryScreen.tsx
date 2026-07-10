@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { FileText, Trash2, Clock, HardDrive, Search, X, Lock, Unlock, Tag, Plus, Star, LayoutGrid, List, ArrowDownAZ, ArrowDown01, Calendar } from 'lucide-react';
 import { storage } from '../lib/storage';
 import { PdfDocument } from '../types';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 interface LibraryScreenProps {
   onOpenPdf: (id: string, isSensitive: boolean) => void;
@@ -23,6 +24,7 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
   const [documents, setDocuments] = useState<LibraryDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [deletePendingId, setDeletePendingId] = useState<string | null>(null);
   
   const [sortBy, setSortBy] = useState<SortBy>('recent');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -64,12 +66,16 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
+  const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this PDF from your device?')) {
-      await storage.deletePdf(id);
-      loadLibrary();
-    }
+    setDeletePendingId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletePendingId) return;
+    await storage.deletePdf(deletePendingId);
+    setDeletePendingId(null);
+    loadLibrary();
   };
 
   const handleToggleSensitive = async (e: React.MouseEvent, id: string, isSensitive: boolean) => {
@@ -631,6 +637,18 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={deletePendingId !== null}
+        title="Delete PDF Document"
+        message="Are you sure you want to delete this PDF from your local device storage? This will also remove any annotations, drawings, and voice memos associated with it."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeletePendingId(null)}
+      />
+
     </div>
   );
 }

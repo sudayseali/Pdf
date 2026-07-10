@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { storage } from '../lib/storage';
 import { StandaloneNote } from '../types';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 // Palette of beautiful modern card colors (light & dark compatible)
 const NOTE_COLORS = [
@@ -67,6 +68,7 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
   // Feedback States
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [deletePendingId, setDeletePendingId] = useState<string | null>(null);
 
   // Load notes on boot
   useEffect(() => {
@@ -142,16 +144,20 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
   };
 
   // Delete a note
-  const handleDeleteNote = async (id: string, e?: React.MouseEvent) => {
+  const handleDeleteNote = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (!confirm('Are you sure you want to delete this note?')) return;
-    
-    const updatedList = await storage.deleteNote(id);
+    setDeletePendingId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletePendingId) return;
+    const updatedList = await storage.deleteNote(deletePendingId);
     setNotes(updatedList);
     
-    if (editingNote?.id === id) {
+    if (editingNote?.id === deletePendingId) {
       setEditingNote(null);
     }
+    setDeletePendingId(null);
     showToast('Note deleted.');
   };
 
@@ -165,12 +171,43 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
   };
 
   // Export note as text file
-  const handleExportAsTxt = (note: StandaloneNote, e?: React.MouseEvent) => {
+  const handleExportAsTxt = async (note: StandaloneNote, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    const fileName = `${note.title.replace(/\s+/g, '_') || 'note'}.txt`;
+    const textContent = `TITLE: ${note.title}\nCREATED: ${new Date(note.createdAt).toLocaleString()}\n\n${note.content}`;
+
+    // On Capacitor Android, navigator.share is highly preferred and works natively
+    if (navigator.share) {
+      try {
+        const file = new File([textContent], fileName, { type: 'text/plain' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: note.title || 'Export Note',
+            text: 'Here is your exported note from SilentPDF'
+          });
+          showToast('Note shared successfully!');
+          return;
+        } else {
+          // Fallback share as text if file sharing is restricted
+          await navigator.share({
+            title: note.title || 'Export Note',
+            text: textContent
+          });
+          showToast('Note shared successfully!');
+          return;
+        }
+      } catch (err) {
+        console.warn('Share failed or was canceled', err);
+        // Fallback to normal download
+      }
+    }
+
+    // Standard browser download fallback
     const element = document.createElement("a");
-    const file = new Blob([`TITLE: ${note.title}\nCREATED: ${new Date(note.createdAt).toLocaleString()}\n\n${note.content}`], {type: 'text/plain'});
+    const file = new Blob([textContent], {type: 'text/plain'});
     element.href = URL.createObjectURL(file);
-    element.download = `${note.title.replace(/\s+/g, '_') || 'note'}.txt`;
+    element.download = fileName;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
@@ -690,6 +727,17 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
         )}
 
       </div>
+
+      <ConfirmModal
+        isOpen={deletePendingId !== null}
+        title="Delete Note"
+        message="Are you sure you want to permanently delete this note from your device? This cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeletePendingId(null)}
+      />
 
     </div>
   );

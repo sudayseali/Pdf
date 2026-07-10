@@ -16,6 +16,8 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
     const saved = localStorage.getItem('daily_reading_goal');
     return saved ? parseInt(saved, 10) : 10;
   });
+  const [isEditingGoal, setIsEditingGoal] = useState(false);
+  const [goalInput, setGoalInput] = useState(String(dailyGoal));
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -118,22 +120,54 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
                 <span className="text-sm text-slate-500 font-semibold">minutes today</span>
               </div>
               
-              <div className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
-                Hadafka: <span className="font-bold text-slate-600 dark:text-slate-300">{dailyGoal}m</span>.
-                <button 
-                  onClick={() => {
-                    const newGoal = prompt('Enter your daily reading goal (minutes):', String(dailyGoal));
-                    if (newGoal && !isNaN(Number(newGoal))) {
-                      const g = parseInt(newGoal, 10);
-                      setDailyGoal(g);
-                      localStorage.setItem('daily_reading_goal', String(g));
-                    }
-                  }}
-                  className="text-blue-500 hover:text-blue-600 hover:underline ml-2 font-bold transition-colors"
-                >
-                  Bedel Hadafka
-                </button>
-              </div>
+              {isEditingGoal ? (
+                <div className="flex items-center gap-2 mt-2">
+                  <input
+                    type="number"
+                    value={goalInput}
+                    onChange={(e) => setGoalInput(e.target.value)}
+                    className="w-20 px-2 py-1 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-bold focus:outline-none focus:border-blue-500"
+                    min="1"
+                    max="1440"
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => {
+                      const val = parseInt(goalInput, 10);
+                      if (val > 0) {
+                        setDailyGoal(val);
+                        localStorage.setItem('daily_reading_goal', String(val));
+                        setIsEditingGoal(false);
+                      }
+                    }}
+                    className="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold rounded-lg cursor-pointer transition-colors"
+                  >
+                    OK
+                  </button>
+                  <button
+                    onClick={() => {
+                      setGoalInput(String(dailyGoal));
+                      setIsEditingGoal(false);
+                    }}
+                    className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-bold rounded-lg cursor-pointer hover:bg-slate-200"
+                  >
+                    X
+                  </button>
+                </div>
+              ) : (
+                <div className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                  Hadafka: <span className="font-bold text-slate-600 dark:text-slate-300">{dailyGoal}m</span>.
+                  <button 
+                    onClick={() => {
+                      setGoalInput(String(dailyGoal));
+                      setIsEditingGoal(true);
+                    }}
+                    className="text-blue-500 hover:text-blue-600 hover:underline ml-2 font-bold transition-colors cursor-pointer"
+                  >
+                    Bedel Hadafka
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
