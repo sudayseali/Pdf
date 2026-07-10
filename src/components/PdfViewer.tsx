@@ -9,6 +9,131 @@ import 'react-pdf/dist/Page/TextLayer.css';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?worker&url';
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
+interface PdfPageItemProps {
+  pageNum: number;
+  pageW: number;
+  pageTheme: 'normal' | 'night' | 'sepia' | 'eye-care';
+  invertColors?: boolean;
+  textRenderer: (textItem: any) => any;
+  pdfId: string;
+  drawingTool: 'none' | 'pen' | 'highlighter' | 'eraser';
+  penColor: string;
+  penWidth: number;
+  highlighterColor: string;
+  highlighterWidth: number;
+  eraserWidth: number;
+  canvasRefs?: React.MutableRefObject<Record<number, any>>;
+  isNearViewport: boolean;
+}
+
+const PdfPageItem = memo(function PdfPageItem({
+  pageNum,
+  pageW,
+  pageTheme,
+  invertColors,
+  textRenderer,
+  pdfId,
+  drawingTool,
+  penColor,
+  penWidth,
+  highlighterColor,
+  highlighterWidth,
+  eraserWidth,
+  canvasRefs,
+  isNearViewport,
+}: PdfPageItemProps) {
+  // Use a default height estimate until loaded, then update it locally without re-rendering other pages.
+  const [localHeight, setLocalHeight] = useState<number>(pageW * 1.414);
+
+  // Keep height ratio responsive to width changes (e.g. on sidebar toggle or screen rotation)
+  useEffect(() => {
+    setLocalHeight((prev) => {
+      const oldRatio = prev / pageW;
+      const ratio = oldRatio > 0.5 && oldRatio < 3 ? oldRatio : 1.414;
+      return pageW * ratio;
+    });
+  }, [pageW]);
+
+  // Restricting DPR to 1.5 max is crucial for fast, high-speed mobile and webview performance.
+  // It consumes 4x less memory and CPU than rendering at high-density (3x-4x) retina resolutions,
+  // yet remains incredibly crisp.
+  const dpr = useMemo(() => Math.min(window.devicePixelRatio || 1, 1.5), []);
+
+  return (
+    <div
+      id={`pdf-page-${pageNum}`}
+      className="relative overflow-hidden bg-white dark:bg-slate-900 shadow-md mb-6 rounded-md select-none border border-slate-200/10"
+      style={{ width: pageW, height: localHeight }}
+    >
+      {isNearViewport ? (
+        <>
+          <Page
+            pageNumber={pageNum}
+            width={pageW}
+            devicePixelRatio={dpr}
+            className={`${
+              pageTheme === 'night' || invertColors ? 'invert hue-rotate-180 brightness-95' : ''
+            }`}
+            renderTextLayer={true}
+            renderAnnotationLayer={false} // Turn off for a massive rendering speed boost on mobile WebViews
+            customTextRenderer={textRenderer}
+            onLoadSuccess={(page) => {
+              const originalHeight = page.originalHeight || page.height;
+              const originalWidth = page.originalWidth || page.width || pageW;
+              setLocalHeight(originalHeight * (pageW / originalWidth));
+            }}
+            loading={
+              <div className="w-full h-full bg-slate-200 dark:bg-slate-800 animate-pulse flex flex-col items-center justify-center">
+                <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin opacity-50 mb-2"></div>
+                <span className="text-slate-400 font-mono text-xs">Xawaareynaya... {pageNum}</span>
+              </div>
+            }
+          />
+
+          {/* Eye comfort overlays */}
+          {pageTheme === 'sepia' && (
+            <div className="absolute inset-0 bg-[#f4ecd8] mix-blend-multiply pointer-events-none z-20 rounded-md" />
+          )}
+          {pageTheme === 'eye-care' && (
+            <div className="absolute inset-0 bg-[#e3f4e1] mix-blend-multiply pointer-events-none z-20 rounded-md" />
+          )}
+
+          {/* Drawing Overlay Canvas */}
+          {pdfId && (
+            <DrawingCanvas
+              ref={(el) => {
+                if (canvasRefs) {
+                  if (el) {
+                    canvasRefs.current[pageNum] = el;
+                  } else {
+                    delete canvasRefs.current[pageNum];
+                  }
+                }
+              }}
+              pdfId={pdfId}
+              pageNumber={pageNum}
+              width={pageW}
+              height={localHeight}
+              isDrawingEnabled={drawingTool !== 'none'}
+              currentTool={drawingTool}
+              strokeColor={penColor}
+              strokeWidth={penWidth}
+              highlighterColor={highlighterColor}
+              highlighterWidth={highlighterWidth}
+              eraserWidth={eraserWidth}
+            />
+          )}
+        </>
+      ) : (
+        <div className="w-full h-full bg-slate-100 dark:bg-slate-800/50 flex flex-col items-center justify-center">
+          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin opacity-50 mb-2"></div>
+          <span className="text-slate-400 font-mono text-xs">Page {pageNum}</span>
+        </div>
+      )}
+    </div>
+  );
+});
+
 interface PdfViewerProps {
   fileData: ArrayBuffer | null;
   currentPage: number;
@@ -56,14 +181,14 @@ export const PdfViewer = memo(function PdfViewer({
   const [containerWidth, setContainerWidth] = useState<number>(window.innerWidth);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageHeights, setPageHeights] = useState<Record<number, number>>({});
   
   const isInternalScroll = useRef(false);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const documentOptions = useMemo(() => ({
-    cMapUrl: 'https://unpkg.com/pdfjs-dist@5.4.296/cmaps/',
+    cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.296/cmaps/',
     cMapPacked: true,
+    standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.296/standard_fonts/',
   }), []);
 
   useEffect(() => {
@@ -241,79 +366,29 @@ export const PdfViewer = memo(function PdfViewer({
               Array.from(new Array(numPages), (el, index) => {
                 const pageNum = index + 1;
                 const pageW = maxWidth * zoom;
-                const pageH = pageHeights[pageNum] || (pageW * 1.414);
                 
-                // Virtualization: only render pages close to the current page to prevent UI freeze
-                const isNearViewport = Math.abs(pageNum - currentPage) <= 3;
+                // Virtualization: only render pages close to the current page to prevent UI freeze and memory explosion.
+                // Keeping it at <= 1 ensures exactly 3 active pages are in memory at once (prev, current, next).
+                const isNearViewport = Math.abs(pageNum - currentPage) <= 1;
 
                 return (
-                  <div 
-                    key={`page_${pageNum}`} 
-                    id={`pdf-page-${pageNum}`}
-                    className="relative overflow-hidden bg-white dark:bg-slate-900 shadow-md mb-6 rounded-md select-none border border-slate-200/10"
-                    style={{ width: pageW, height: pageH }}
-                  >
-                    {isNearViewport ? (
-                      <>
-                        <Page
-                          pageNumber={pageNum}
-                          width={pageW}
-                          className={`${(pageTheme === 'night' || invertColors) ? 'invert hue-rotate-180 brightness-95' : ''}`}
-                          renderTextLayer={true}
-                          renderAnnotationLayer={true}
-                          customTextRenderer={textRenderer}
-                          onLoadSuccess={(page) => {
-                            // originalHeight & originalWidth exist on pdfjs.Page
-                            const originalHeight = page.originalHeight || page.height;
-                            const originalWidth = page.originalWidth || page.width || pageW;
-                            setPageHeights(prev => ({ ...prev, [pageNum]: originalHeight * (pageW / originalWidth) }));
-                          }}
-                          loading={
-                            <div className="w-full h-full bg-slate-200 dark:bg-slate-800 animate-pulse" />
-                          }
-                        />
-
-                        {/* Eye comfort overlays */}
-                        {pageTheme === 'sepia' && (
-                          <div className="absolute inset-0 bg-[#f4ecd8] mix-blend-multiply pointer-events-none z-20 rounded-md" />
-                        )}
-                        {pageTheme === 'eye-care' && (
-                          <div className="absolute inset-0 bg-[#e3f4e1] mix-blend-multiply pointer-events-none z-20 rounded-md" />
-                        )}
-
-                        {/* Samsung-style Drawing Overlay Canvas */}
-                        {pdfId && (
-                          <DrawingCanvas
-                            ref={(el) => {
-                              if (canvasRefs) {
-                                if (el) {
-                                  canvasRefs.current[pageNum] = el;
-                                } else {
-                                  delete canvasRefs.current[pageNum];
-                                }
-                              }
-                            }}
-                            pdfId={pdfId}
-                            pageNumber={pageNum}
-                            width={pageW}
-                            height={pageH}
-                            isDrawingEnabled={drawingTool !== 'none'}
-                            currentTool={drawingTool}
-                            strokeColor={penColor}
-                            strokeWidth={penWidth}
-                            highlighterColor={highlighterColor}
-                            highlighterWidth={highlighterWidth}
-                            eraserWidth={eraserWidth}
-                          />
-                        )}
-                      </>
-                    ) : (
-                      <div className="w-full h-full bg-slate-100 dark:bg-slate-800/50 flex flex-col items-center justify-center">
-                         <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin opacity-50 mb-2"></div>
-                         <span className="text-slate-400 font-mono text-xs">Page {pageNum}</span>
-                      </div>
-                    )}
-                  </div>
+                  <PdfPageItem
+                    key={`page_${pageNum}`}
+                    pageNum={pageNum}
+                    pageW={pageW}
+                    pageTheme={pageTheme}
+                    invertColors={invertColors}
+                    textRenderer={textRenderer}
+                    pdfId={pdfId}
+                    drawingTool={drawingTool}
+                    penColor={penColor}
+                    penWidth={penWidth}
+                    highlighterColor={highlighterColor}
+                    highlighterWidth={highlighterWidth}
+                    eraserWidth={eraserWidth}
+                    canvasRefs={canvasRefs}
+                    isNearViewport={isNearViewport}
+                  />
                 );
               })
             ) : (
