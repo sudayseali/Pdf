@@ -204,12 +204,14 @@ export function SettingsModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            {step === 'settings' ? <Settings className="w-4 h-4 text-blue-500" /> : <Shield className="w-4 h-4 text-blue-500" />}
-            {step === 'settings' ? 'Settings' : 'Security'}
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md">
+      <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden flex flex-col border border-slate-200/50 dark:border-slate-800/50 animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-800/50">
+          <h2 className="text-base font-black text-slate-900 dark:text-slate-100 flex items-center gap-3 font-display tracking-tight">
+            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
+              {step === 'settings' ? <Settings className="w-5 h-5 text-blue-500" /> : <Shield className="w-5 h-5 text-blue-500" />}
+            </div>
+            {step === 'settings' ? 'Settings & Prefs' : 'Security'}
           </h2>
           {mode !== 'verify_app' && (
             <button
@@ -220,112 +222,112 @@ export function SettingsModal({
                   if (onClose) onClose();
                 }
               }}
-              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-2 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
           )}
         </div>
 
         {/* Tab Selection Navigation for Settings Screen */}
         {step === 'settings' && (
-          <div className="flex border-b border-slate-100 dark:border-slate-800 px-4 py-2 bg-slate-50 dark:bg-slate-900/50">
+          <div className="flex px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800/50 gap-2">
             <button
               onClick={() => setActiveTab('preferences')}
-              className={`flex-1 py-1.5 text-xs font-bold transition-all rounded-lg ${
+              className={`flex-1 py-2.5 px-2 text-[11px] uppercase tracking-widest font-black transition-all rounded-xl cursor-pointer ${
                 activeTab === 'preferences'
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-400 font-extrabold'
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 border border-blue-500'
+                  : 'bg-white dark:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-sm'
               }`}
             >
-              Appearance & PIN
+              General
             </button>
             <button
               onClick={() => setActiveTab('stats')}
-              className={`flex-1 py-1.5 text-xs font-bold transition-all rounded-lg ${
+              className={`flex-1 py-2.5 px-2 text-[11px] uppercase tracking-widest font-black transition-all rounded-xl cursor-pointer ${
                 activeTab === 'stats'
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-400 font-extrabold'
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 border border-blue-500'
+                  : 'bg-white dark:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-sm'
               }`}
             >
-              Statistics
+              Stats
             </button>
             <button
               onClick={() => setActiveTab('backup')}
-              className={`flex-1 py-1.5 text-xs font-bold transition-all rounded-lg ${
+              className={`flex-1 py-2.5 px-2 text-[11px] uppercase tracking-widest font-black transition-all rounded-xl cursor-pointer ${
                 activeTab === 'backup'
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-400 font-extrabold'
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 border border-blue-500'
+                  : 'bg-white dark:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-sm'
               }`}
             >
-              Backup & Restore
+              Backup
             </button>
           </div>
         )}
         
-        <div className="p-6 flex flex-col items-center max-h-[75vh] overflow-y-auto">
+        <div className="p-6 md:p-8 flex flex-col items-center max-h-[75vh] overflow-y-auto">
           {step === 'settings' ? (
             <div className="w-full">
               {activeTab === 'preferences' && (
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {/* Appearance Section */}
-                  <div className="space-y-3">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Appearance</h3>
+                  <div className="space-y-4">
+                    <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 font-mono ml-1">Appearance</h3>
                     
-                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-800">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                          {appState.darkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                    <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 border border-blue-100/50 dark:border-blue-800/50">
+                          {appState.darkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Dark Mode</p>
-                          <p className="text-[10px] text-slate-500">Toggle dark appearance</p>
+                          <p className="text-sm font-black text-slate-900 dark:text-slate-100 font-display tracking-tight">Dark Mode</p>
+                          <p className="text-[11px] font-medium text-slate-500">Toggle dark appearance</p>
                         </div>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" className="sr-only peer" checked={appState.darkMode} onChange={onToggleDarkMode} disabled={appState.autoDarkMode} />
-                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 shadow-inner"></div>
                       </label>
                     </div>
 
-                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-800">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                          <Monitor className="w-4 h-4" />
+                    <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-800/50">
+                          <Monitor className="w-5 h-5" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Auto Dark Mode</p>
-                          <p className="text-[10px] text-slate-500">Follow time of day</p>
+                          <p className="text-sm font-black text-slate-900 dark:text-slate-100 font-display tracking-tight">Auto Dark Mode</p>
+                          <p className="text-[11px] font-medium text-slate-500">Follow time of day</p>
                         </div>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" className="sr-only peer" checked={appState.autoDarkMode} onChange={onToggleAutoDarkMode} />
-                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 shadow-inner"></div>
                       </label>
                     </div>
                   </div>
 
                   {/* Security Section */}
-                  <div className="space-y-3">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Security</h3>
+                  <div className="space-y-4">
+                    <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 font-mono ml-1">Security</h3>
                     
                     <div 
                       onClick={() => {
                         if (savedPin) setStep('verify_to_manage');
                         else setStep('set_new');
                       }}
-                      className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-800 cursor-pointer active:scale-[0.98] transition-transform"
+                      className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm cursor-pointer active:scale-[0.98] transition-all hover:border-blue-500/50"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${savedPin ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
-                          <Lock className="w-4 h-4" />
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${savedPin ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border-amber-100/50 dark:border-amber-800/50' : 'bg-slate-50 dark:bg-slate-800 text-slate-400 border-slate-200/50 dark:border-slate-700/50'}`}>
+                          <Lock className="w-5 h-5" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-slate-900 dark:text-slate-100">App Lock PIN</p>
-                          <p className="text-[10px] text-slate-500">{savedPin ? 'PIN is active' : 'No PIN set'}</p>
+                          <p className="text-sm font-black text-slate-900 dark:text-slate-100 font-display tracking-tight">App Lock PIN</p>
+                          <p className="text-[11px] font-medium text-slate-500">{savedPin ? 'PIN is active' : 'No PIN set'}</p>
                         </div>
                       </div>
-                      <div className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                      <div className="text-[11px] font-black uppercase tracking-widest bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
                         {savedPin ? 'Manage' : 'Setup'}
                       </div>
                     </div>
@@ -364,38 +366,44 @@ export function SettingsModal({
 
               {/* Statistics Tab */}
               {activeTab === 'stats' && (
-                <div className="w-full space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-4 bg-orange-50 dark:bg-orange-950/20 rounded-xl border border-orange-200/50 dark:border-orange-950/50 text-center flex flex-col items-center justify-center">
-                      <Flame className="w-8 h-8 text-orange-500 mb-1" />
-                      <span className="text-2xl font-black text-orange-600 dark:text-orange-400">{stats.streak}</span>
-                      <span className="text-[10px] font-bold text-orange-500 dark:text-orange-600/80 uppercase tracking-wider mt-1">Reading Streak</span>
+                <div className="w-full space-y-6 animate-in slide-in-from-right-4 duration-200">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-5 bg-orange-50 dark:bg-orange-950/20 rounded-3xl border border-orange-200/50 dark:border-orange-950/50 text-center flex flex-col items-center justify-center shadow-sm">
+                      <div className="p-3 bg-white dark:bg-orange-900/30 rounded-2xl mb-3 shadow-sm border border-orange-100/50 dark:border-orange-800/50">
+                        <Flame className="w-6 h-6 text-orange-500" />
+                      </div>
+                      <span className="text-3xl font-black text-orange-600 dark:text-orange-400 font-display">{stats.streak}</span>
+                      <span className="text-[10px] font-black text-orange-500 dark:text-orange-600/80 uppercase tracking-widest mt-1 font-mono">Reading Streak</span>
                     </div>
 
-                    <div className="p-4 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl border border-emerald-200/50 dark:border-emerald-950/50 text-center flex flex-col items-center justify-center">
-                      <BookOpen className="w-8 h-8 text-emerald-500 mb-1" />
-                      <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{stats.pageFlips}</span>
-                      <span className="text-[10px] font-bold text-emerald-500 dark:text-emerald-600/80 uppercase tracking-wider mt-1">Pages Read</span>
+                    <div className="p-5 bg-emerald-50 dark:bg-emerald-950/20 rounded-3xl border border-emerald-200/50 dark:border-emerald-950/50 text-center flex flex-col items-center justify-center shadow-sm">
+                      <div className="p-3 bg-white dark:bg-emerald-900/30 rounded-2xl mb-3 shadow-sm border border-emerald-100/50 dark:border-emerald-800/50">
+                        <BookOpen className="w-6 h-6 text-emerald-500" />
+                      </div>
+                      <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-display">{stats.pageFlips}</span>
+                      <span className="text-[10px] font-black text-emerald-500 dark:text-emerald-600/80 uppercase tracking-widest mt-1 font-mono">Pages Read</span>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-xl border border-blue-200/50 dark:border-blue-950/50 flex items-center gap-4">
-                    <Clock className="w-10 h-10 text-blue-500 shrink-0" />
+                  <div className="p-5 bg-blue-50 dark:bg-blue-950/20 rounded-3xl border border-blue-200/50 dark:border-blue-950/50 flex items-center gap-5 shadow-sm">
+                    <div className="p-4 bg-white dark:bg-blue-900/30 rounded-2xl shadow-sm border border-blue-100/50 dark:border-blue-800/50 shrink-0">
+                      <Clock className="w-6 h-6 text-blue-500" />
+                    </div>
                     <div className="flex-1">
-                      <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">Total Reading Time</p>
-                      <p className="text-lg font-black text-blue-800 dark:text-blue-300 mt-0.5">
+                      <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest font-mono">Total Time</p>
+                      <p className="text-xl md:text-2xl font-black text-blue-800 dark:text-blue-300 mt-1 font-display tracking-tight">
                         {stats.totalTime < 60
-                          ? `${stats.totalTime} Seconds`
+                          ? `${stats.totalTime} Secs`
                           : stats.totalTime < 3600
-                          ? `${Math.floor(stats.totalTime / 60)} Minutes`
-                          : `${Math.floor(stats.totalTime / 3600)}h and ${Math.floor((stats.totalTime % 3600) / 60)}m`
+                          ? `${Math.floor(stats.totalTime / 60)} Mins`
+                          : `${Math.floor(stats.totalTime / 3600)}h ${Math.floor((stats.totalTime % 3600) / 60)}m`
                         }
                       </p>
                     </div>
                   </div>
 
-                  <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-lg flex items-start gap-2.5 text-[10px] text-slate-500 leading-relaxed border border-slate-100 dark:border-slate-800">
-                    <AlertCircle className="w-4 h-4 text-slate-400 shrink-0" />
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl flex items-start gap-3 text-[11px] font-medium text-slate-500 leading-relaxed border border-slate-100 dark:border-slate-800">
+                    <AlertCircle className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
                     <span>This data is stored locally on your device and is fully offline.</span>
                   </div>
                 </div>
@@ -403,48 +411,53 @@ export function SettingsModal({
 
               {/* Backup Tab */}
               {activeTab === 'backup' && (
-                <div className="w-full space-y-4">
-                  <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg flex items-start gap-2.5 text-[10px] text-amber-700 dark:text-amber-300 leading-relaxed border border-amber-100 dark:border-amber-900/30">
-                    <Database className="w-4 h-4 text-amber-500 shrink-0" />
+                <div className="w-full space-y-6 animate-in slide-in-from-right-4 duration-200">
+                  <div className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-2xl flex items-start gap-3 text-[11px] font-medium text-amber-700 dark:text-amber-300 leading-relaxed border border-amber-100 dark:border-amber-900/30">
+                    <Database className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                     <span>All of your data is stored locally on this device. Create a backup to protect against data loss or to migrate to another device.</span>
                   </div>
 
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-slate-500">Create Backup</h4>
+                  <div className="space-y-3">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 font-mono ml-1">Create Backup</h4>
                     
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <button
                         onClick={() => handleExportBackup(false)}
                         disabled={isBackingUp}
-                        className="p-3 text-left bg-slate-50 dark:bg-slate-800/55 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between transition-all hover:shadow-sm"
+                        className="p-4 text-left bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between transition-all hover:shadow-md hover:border-indigo-500/30 group"
                       >
-                        <Download className="w-5 h-5 text-indigo-500 mb-2" />
+                        <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl mb-3 inline-block group-hover:scale-110 transition-transform">
+                          <Download className="w-5 h-5 text-indigo-500" />
+                        </div>
                         <div>
-                          <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Light Backup</p>
-                          <p className="text-[9px] text-slate-500 mt-0.5">Notes, bookmarks & highlights only</p>
+                          <p className="text-sm font-black text-slate-800 dark:text-slate-200 font-display">Light Backup</p>
+                          <p className="text-[10px] font-medium text-slate-500 mt-1 line-clamp-2">Notes, bookmarks & highlights only</p>
                         </div>
                       </button>
 
                       <button
                         onClick={() => handleExportBackup(true)}
                         disabled={isBackingUp}
-                        className="p-3 text-left bg-slate-50 dark:bg-slate-800/55 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between transition-all hover:shadow-sm"
+                        className="p-4 text-left bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between transition-all hover:shadow-md hover:border-emerald-500/30 group"
                       >
-                        <Download className="w-5 h-5 text-emerald-500 mb-2" />
+                        <div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl mb-3 inline-block group-hover:scale-110 transition-transform">
+                          <Download className="w-5 h-5 text-emerald-500" />
+                        </div>
                         <div>
-                          <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Full Backup</p>
-                          <p className="text-[9px] text-slate-500 mt-0.5">Includes all imported PDF files</p>
+                          <p className="text-sm font-black text-slate-800 dark:text-slate-200 font-display">Full Backup</p>
+                          <p className="text-[10px] font-medium text-slate-500 mt-1 line-clamp-2">Includes all imported PDF files</p>
                         </div>
                       </button>
                     </div>
 
                     {backupMessage && (
-                      <p className="text-[10px] font-bold text-center text-blue-600 dark:text-blue-400 mt-1">{backupMessage}</p>
+                      <p className="text-[11px] font-black text-center text-blue-600 dark:text-blue-400 mt-3 bg-blue-50 dark:bg-blue-900/30 py-2 rounded-lg">{backupMessage}</p>
                     )}
                   </div>
 
-                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-slate-500">Restore Backup</h4>
+                  <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800/50">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 font-mono ml-1">Restore Backup</h4>
+                    
                     
                     <div className="relative">
                       <input
@@ -456,51 +469,51 @@ export function SettingsModal({
                       />
                       <button
                         onClick={() => document.getElementById('restore-file-input')?.click()}
-                        className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition-colors shadow-sm"
+                        className="w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-black rounded-2xl transition-all shadow-sm border border-slate-200 dark:border-slate-700 cursor-pointer active:scale-[0.98]"
                       >
                         <Upload className="w-4 h-4" />
-                        <span>Select Backup File (.json)</span>
+                        <span className="uppercase tracking-widest">Select Backup (.json)</span>
                       </button>
                     </div>
 
                     {restoreMessage && (
-                      <p className="text-[10px] font-bold text-center text-emerald-600 dark:text-emerald-400 mt-1">{restoreMessage}</p>
+                      <p className="text-[11px] font-black text-center text-emerald-600 dark:text-emerald-400 mt-3 bg-emerald-50 dark:bg-emerald-900/30 py-2 rounded-lg">{restoreMessage}</p>
                     )}
                     {restoreError && (
-                      <p className="text-[10px] font-bold text-center text-red-500 mt-1">{restoreError}</p>
+                      <p className="text-[11px] font-black text-center text-red-500 mt-3 bg-red-50 dark:bg-red-900/30 py-2 rounded-lg">{restoreError}</p>
                     )}
                   </div>
                 </div>
               )}
             </div>
           ) : step === 'managed' ? (
-            <div className="w-full flex flex-col items-center text-center py-6">
-              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mb-4">
-                <Shield className="w-8 h-8" />
+            <div className="w-full flex flex-col items-center text-center py-6 animate-in zoom-in-95 duration-300">
+              <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-[2rem] flex items-center justify-center mb-6 shadow-inner border border-emerald-100/50 dark:border-emerald-800/50">
+                <Shield className="w-10 h-10" />
               </div>
-              <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-1">App Secured</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+              <h3 className="text-xl font-black text-slate-900 dark:text-slate-100 mb-2 font-display tracking-tight">App Secured</h3>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-8 max-w-[250px]">
                 Your app is protected with a PIN.
               </p>
               
               <button
                 onClick={handleRemovePin}
-                className="w-full py-2.5 px-4 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 font-medium rounded-lg transition-colors border border-red-200 dark:border-red-900/50"
+                className="w-full py-3.5 px-4 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 font-black rounded-2xl transition-all border border-red-200 dark:border-red-900/50 cursor-pointer active:scale-[0.98]"
               >
-                Remove PIN
+                REMOVE PIN
               </button>
             </div>
           ) : (
-            <div className="w-full flex flex-col items-center py-6">
-              <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mb-4">
-                {step.startsWith('verify') ? <Lock className="w-6 h-6" /> : <Key className="w-6 h-6" />}
+            <div className="w-full flex flex-col items-center py-6 animate-in slide-in-from-bottom-4 duration-300">
+              <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-[2rem] flex items-center justify-center mb-6 shadow-inner border border-blue-100/50 dark:border-blue-800/50">
+                {step.startsWith('verify') ? <Lock className="w-10 h-10" /> : <Key className="w-10 h-10" />}
               </div>
               
-              <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-1 text-center">
+              <h3 className="text-xl font-black text-slate-900 dark:text-slate-100 mb-2 text-center font-display tracking-tight">
                 {step.startsWith('verify') ? 'Enter PIN' : step === 'set_new' ? 'Create PIN' : 'Confirm PIN'}
               </h3>
               
-              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 text-center h-10">
+              <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400 mb-8 text-center h-10 max-w-[280px]">
                 {step === 'verify_to_open' && 'Enter your PIN to access this document.'}
                 {step === 'verify_app' && 'Enter your PIN to unlock the app.'}
                 {step === 'verify_to_manage' && 'Enter your current PIN to manage security settings.'}
@@ -508,7 +521,7 @@ export function SettingsModal({
                 {step === 'confirm_new' && 'Enter your 4-digit PIN again to confirm.'}
               </p>
               
-              <div className="relative mb-2 w-full max-w-[200px]">
+              <div className="relative mb-4 w-full max-w-[240px]">
                 <input
                   ref={inputRef}
                   type="password"
@@ -517,17 +530,20 @@ export function SettingsModal({
                   maxLength={4}
                   value={pin}
                   onChange={handlePinChange}
-                  className="w-full text-center tracking-[1em] text-2xl font-mono py-3 px-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full text-center tracking-[1em] text-3xl font-black font-mono py-4 px-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 shadow-inner placeholder:text-slate-300 dark:placeholder:text-slate-700"
                   autoComplete="off"
+                  placeholder="••••"
                 />
               </div>
               
               <div className="h-6 mt-2 flex items-center justify-center w-full">
                 {error && (
-                  <p className="text-xs font-medium text-red-500 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    {error}
-                  </p>
+                  <div className="px-3 py-1 bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 rounded-lg">
+                    <p className="text-[11px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 flex items-center gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      {error}
+                    </p>
+                  </div>
                 )}
               </div>
             </div>

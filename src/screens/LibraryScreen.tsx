@@ -228,18 +228,18 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
             {/* Search */}
             <div className="relative w-full md:w-96">
-              <Search className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search documents..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg pl-10 pr-10 py-2.5 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow shadow-sm"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-2xl pl-11 pr-10 py-3 text-sm font-semibold text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-sm"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -247,40 +247,40 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
             </div>
 
             {/* View & Sort Controls */}
-            <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
-              <div className="flex bg-white dark:bg-slate-800 rounded-lg p-1 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar shrink-0">
+              <div className="flex bg-white dark:bg-slate-900 rounded-2xl p-1 shadow-sm border border-slate-200/50 dark:border-slate-800">
                 <button
                   onClick={() => setSortBy('recent')}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${sortBy === 'recent' ? 'bg-slate-100 dark:bg-slate-700 text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${sortBy === 'recent' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
                 >
-                  <Clock className="w-3.5 h-3.5" /> Recent
+                  <Clock className="w-4 h-4" /> Recent
                 </button>
                 <button
                   onClick={() => setSortBy('name')}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${sortBy === 'name' ? 'bg-slate-100 dark:bg-slate-700 text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${sortBy === 'name' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
                 >
-                  <ArrowDownAZ className="w-3.5 h-3.5" /> Name
+                  <ArrowDownAZ className="w-4 h-4" /> Name
                 </button>
                 <button
                   onClick={() => setSortBy('date')}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${sortBy === 'date' ? 'bg-slate-100 dark:bg-slate-700 text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${sortBy === 'date' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
                 >
-                  <Calendar className="w-3.5 h-3.5" /> Date
+                  <Calendar className="w-4 h-4" /> Date
                 </button>
               </div>
 
-              <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 hidden md:block mx-1" />
+              <div className="w-px h-8 bg-slate-200 dark:bg-slate-800 hidden md:block mx-1" />
 
-              <div className="flex bg-white dark:bg-slate-800 rounded-lg p-1 shadow-sm border border-slate-200 dark:border-slate-700 shrink-0">
+              <div className="flex bg-white dark:bg-slate-900 rounded-2xl p-1 shadow-sm border border-slate-200/50 dark:border-slate-800 shrink-0">
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-slate-100 dark:bg-slate-700 text-blue-600 dark:text-blue-400' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                  className={`p-2.5 rounded-xl transition-all cursor-pointer ${viewMode === 'list' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
                 >
                   <List className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-slate-100 dark:bg-slate-700 text-blue-600 dark:text-blue-400' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                  className={`p-2.5 rounded-xl transition-all cursor-pointer ${viewMode === 'grid' ? 'bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
@@ -290,13 +290,13 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
 
           {/* Tag Filters */}
           {allUniqueTags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 py-1">
               <button
                 onClick={() => setSelectedTagFilter(null)}
-                className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider transition-colors border ${
+                className={`px-4 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 border cursor-pointer ${
                   selectedTagFilter === null 
-                    ? 'bg-slate-800 border-slate-800 text-white dark:bg-slate-200 dark:border-slate-200 dark:text-slate-900' 
-                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700'
+                    ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/10' 
+                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800'
                 }`}
               >
                 All
@@ -305,10 +305,10 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
                 <button
                   key={tag}
                   onClick={() => setSelectedTagFilter(tag)}
-                  className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider transition-colors border ${
+                  className={`px-4 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 border cursor-pointer ${
                     selectedTagFilter === tag 
-                      ? 'bg-blue-600 border-blue-600 text-white dark:bg-blue-500 dark:border-blue-500' 
-                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700'
+                      ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/10' 
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800'
                   }`}
                 >
                   {tag}
@@ -318,120 +318,123 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
           )}
 
           {/* Document List/Grid */}
-          <div>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">
-              {searchQuery || selectedTagFilter ? 'Search Results' : 'Your Library'}
+          <div className="space-y-4">
+            <h2 className="text-[11px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 font-mono">
+              {searchQuery || selectedTagFilter ? 'Natiijada Baaritaanka (Search Results)' : 'Khaanadda PDF-yada (Your Library)'}
             </h2>
             
             {filteredAndSortedDocuments.length === 0 ? (
-              <div className="text-center py-12 text-sm text-slate-500 bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 border-dashed">
-                No documents found.
+              <div className="text-center py-16 text-sm font-medium text-slate-500 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 border-dashed shadow-sm">
+                Wax dukumiinti ah oo la helay ma jiraan.
               </div>
             ) : (
-              <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4' : 'flex flex-col gap-3'}>
+              <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5' : 'flex flex-col gap-3.5'}>
                 {filteredAndSortedDocuments.map((doc) => (
                   <div 
                     key={doc.id}
                     onClick={() => onOpenPdf(doc.id, !!doc.isSensitive)}
-                    className={`bg-white dark:bg-slate-800/80 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-blue-400 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-[0.99] overflow-hidden ${
-                      viewMode === 'grid' ? 'flex flex-col' : 'flex items-center p-3 gap-4'
+                    className={`bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-800/80 cursor-pointer hover:border-blue-500/50 dark:hover:border-slate-700 hover:shadow-xl dark:hover:shadow-2xl dark:hover:shadow-blue-500/5 transition-all duration-300 overflow-hidden group ${
+                      viewMode === 'grid' ? 'flex flex-col h-full' : 'flex items-center p-4 sm:p-5 gap-5'
                     }`}
                   >
                     {/* Icon section */}
-                    <div className={`${viewMode === 'grid' ? 'h-32 w-full bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-700 flex items-center justify-center relative group' : 'w-12 h-12 shrink-0 rounded-lg flex items-center justify-center shadow-sm relative group'} ${doc.isSensitive ? 'text-amber-500' : 'text-blue-500'}`}>
+                    <div className={`${viewMode === 'grid' ? 'h-40 w-full bg-slate-50 dark:bg-slate-950 border-b border-slate-100 dark:border-slate-800 flex items-center justify-center relative' : 'w-16 h-16 shrink-0 rounded-2xl flex items-center justify-center shadow-sm relative'} ${doc.isSensitive ? 'text-amber-500' : 'text-blue-500'}`}>
                       {/* Background placeholder based on view mode */}
                       {viewMode === 'grid' ? (
-                         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm ${doc.isSensitive ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-blue-100 dark:bg-blue-900/30'}`}>
-                           {doc.isSensitive ? <Lock className="w-8 h-8" /> : <FileText className="w-8 h-8" />}
+                         <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center shadow-sm border ${doc.isSensitive ? 'bg-amber-100 dark:bg-amber-950/40 border-amber-200/50 dark:border-amber-900/50' : 'bg-blue-100 dark:bg-blue-950/40 border-blue-200/50 dark:border-blue-900/50'} transition-transform duration-300 group-hover:scale-110`}>
+                           {doc.isSensitive ? <Lock className="w-10 h-10" /> : <FileText className="w-10 h-10 text-blue-600 dark:text-blue-400" />}
                          </div>
                       ) : (
-                         <div className={`w-full h-full rounded-lg flex items-center justify-center ${doc.isSensitive ? 'bg-amber-500 text-white' : 'bg-blue-600 text-white'}`}>
-                           {doc.isSensitive ? <Lock className="w-6 h-6" /> : <FileText className="w-6 h-6" />}
+                         <div className={`w-full h-full rounded-2xl flex items-center justify-center border transition-transform duration-300 group-hover:scale-105 ${doc.isSensitive ? 'bg-amber-50 dark:bg-amber-900/30 border-amber-100/50 dark:border-amber-800/50 text-amber-600 dark:text-amber-400' : 'bg-blue-50 dark:bg-blue-900/30 border-blue-100/50 dark:border-blue-800/50 text-blue-600 dark:text-blue-400'}`}>
+                           {doc.isSensitive ? <Lock className="w-7 h-7" /> : <FileText className="w-7 h-7" />}
                          </div>
                       )}
                       
                       {/* Favorite Badge Absolute */}
                       {doc.isFavorite && (
-                        <div className={`absolute ${viewMode === 'grid' ? 'top-3 right-3' : '-top-1 -right-1'} text-yellow-400 drop-shadow-sm`}>
-                          <Star className="w-5 h-5 fill-current" />
+                        <div className={`absolute ${viewMode === 'grid' ? 'top-4 right-4' : '-top-2 -right-2'} text-yellow-400 drop-shadow-sm`}>
+                          <Star className="w-6 h-6 fill-current animate-pulse" />
                         </div>
                       )}
                     </div>
 
                     {/* Content Section */}
-                    <div className={`flex-1 min-w-0 ${viewMode === 'grid' ? 'p-4 flex flex-col' : ''}`}>
-                      <h3 className={`text-sm font-semibold text-slate-900 dark:text-slate-100 truncate ${viewMode === 'grid' ? 'mb-1' : ''}`}>
-                        {doc.name}
-                      </h3>
-                      
-                      <div className="flex items-center gap-3 mt-1 text-[10px] font-medium text-slate-500 dark:text-slate-400">
-                        <span>{formatSize(doc.size)}</span>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {formatDate(doc.addedAt)}
-                        </div>
-                      </div>
-                      
-                      {doc.numPages ? (
-                        <div className="flex items-center gap-3 mt-2.5">
-                          <div className="flex-1 max-w-[120px] h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-blue-500 rounded-full transition-all" 
-                              style={{ width: `${doc.progress || 0}%` }} 
-                            />
+                    <div className={`flex-1 min-w-0 ${viewMode === 'grid' ? 'p-5 flex flex-col justify-between' : ''}`}>
+                      <div>
+                        <h3 className={`text-base font-black text-slate-900 dark:text-slate-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors font-display tracking-tight ${viewMode === 'grid' ? 'mb-1.5' : ''}`}>
+                          {doc.name}
+                        </h3>
+                        
+                        <div className="flex items-center gap-3 mt-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-500 font-mono">
+                          <span>{formatSize(doc.size)}</span>
+                          <span className="w-1.5 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5" />
+                            {formatDate(doc.addedAt)}
                           </div>
-                          <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold tracking-wide">{Math.round(doc.progress || 0)}% Read</span>
                         </div>
-                      ) : null}
-                      
-                      {doc.tags && doc.tags.length > 0 && (
-                        <div className={`flex flex-wrap items-center gap-1.5 ${viewMode === 'grid' ? 'mt-4' : 'mt-2'}`}>
-                          {doc.tags.map(tag => (
-                            <span key={tag} className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                        
+                        {doc.numPages ? (
+                          <div className="flex items-center gap-4 mt-4">
+                            <div className="flex-1 max-w-[160px] h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+                              <div 
+                                className="h-full bg-blue-500 dark:bg-blue-400 rounded-full transition-all" 
+                                style={{ width: `${doc.progress || 0}%` }} 
+                              />
+                            </div>
+                            <span className="text-[10px] text-blue-600 dark:text-blue-400 font-black tracking-widest font-mono uppercase bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-md">{Math.round(doc.progress || 0)}% READ</span>
+                          </div>
+                        ) : null}
+                        
+                        {doc.tags && doc.tags.length > 0 && (
+                          <div className={`flex flex-wrap items-center gap-2 ${viewMode === 'grid' ? 'mt-4' : 'mt-3'}`}>
+                            {doc.tags.map(tag => (
+                              <span key={tag} className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
 
                       {/* Actions for Grid View */}
                       {viewMode === 'grid' && (
-                        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                          <div className="flex items-center gap-1">
+                        <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-700/50">
                             <button 
                               onClick={(e) => handleToggleFavorite(e, doc.id, !!doc.isFavorite)}
-                              className={`p-1.5 rounded-full transition-colors ${doc.isFavorite ? 'text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : 'text-slate-400 hover:text-yellow-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                              className={`p-2.5 rounded-xl transition-all cursor-pointer ${doc.isFavorite ? 'text-yellow-500 bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-400 hover:text-yellow-500 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}
                               title={doc.isFavorite ? 'Remove favorite' : 'Add to favorites'}
                             >
                               <Star className={`w-4 h-4 ${doc.isFavorite ? 'fill-current' : ''}`} />
                             </button>
                             <button 
                               onClick={(e) => openTagModal(e, doc.id)}
-                              className="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-colors"
+                              className="p-2.5 text-slate-400 hover:text-blue-500 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm rounded-xl transition-all cursor-pointer"
                               title="Manage tags"
                             >
                               <Tag className="w-4 h-4" />
                             </button>
                             <button 
                               onClick={(e) => handleOpenNotes(e, doc)}
-                              className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-full transition-colors relative"
+                              className="p-2.5 text-slate-400 hover:text-amber-500 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm rounded-xl transition-all relative cursor-pointer"
                               title="Document notes"
                             >
                               <FileText className="w-4 h-4" />
-                              {doc.notes && <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-amber-500 rounded-full"></span>}
+                              {doc.notes && <span className="absolute top-2 right-2 w-2 h-2 bg-amber-500 border-2 border-white dark:border-slate-700 rounded-full animate-pulse"></span>}
                             </button>
                           </div>
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-700/50">
                             <button 
                               onClick={(e) => handleToggleSensitive(e, doc.id, !!doc.isSensitive)}
-                              className={`p-1.5 rounded-full transition-colors ${doc.isSensitive ? 'text-amber-500 bg-amber-50 dark:bg-amber-900/30' : 'text-slate-400 hover:text-amber-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                              className={`p-2.5 rounded-xl transition-all cursor-pointer ${doc.isSensitive ? 'text-amber-500 bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-400 hover:text-amber-500 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}
                               title={doc.isSensitive ? 'Remove protection' : 'Protect document'}
                             >
                               {doc.isSensitive ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
                             </button>
                             <button 
                               onClick={(e) => handleDelete(e, doc.id)}
-                              className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors"
+                              className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm rounded-xl transition-all cursor-pointer"
                               title="Delete document"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -443,39 +446,40 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
                     
                     {/* Actions for List View */}
                     {viewMode === 'list' && (
-                      <div className="flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded-2xl border border-slate-100/50 dark:border-slate-700/50 shadow-sm shrink-0">
                         <button 
                           onClick={(e) => handleToggleFavorite(e, doc.id, !!doc.isFavorite)}
-                          className={`p-2 rounded-full transition-colors ${doc.isFavorite ? 'text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20' : 'text-slate-400 hover:text-yellow-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                          className={`p-2 rounded-lg transition-all cursor-pointer ${doc.isFavorite ? 'text-yellow-500 bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-400 hover:text-yellow-500 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}
                           title={doc.isFavorite ? 'Remove favorite' : 'Add to favorites'}
                         >
                           <Star className={`w-4 h-4 ${doc.isFavorite ? 'fill-current' : ''}`} />
                         </button>
                         <button 
                           onClick={(e) => openTagModal(e, doc.id)}
-                          className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-colors"
+                          className="p-2 text-slate-400 hover:text-blue-500 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm rounded-lg transition-all cursor-pointer"
                           title="Manage tags"
                         >
                           <Tag className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={(e) => handleOpenNotes(e, doc)}
-                          className="p-2 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-full transition-colors relative"
+                          className="p-2 text-slate-400 hover:text-amber-500 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm rounded-lg transition-all relative cursor-pointer"
                           title="Document notes"
                         >
                           <FileText className="w-4 h-4" />
-                          {doc.notes && <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-amber-500 rounded-full"></span>}
+                          {doc.notes && <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></span>}
                         </button>
+                        <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1" />
                         <button 
                           onClick={(e) => handleToggleSensitive(e, doc.id, !!doc.isSensitive)}
-                          className={`p-2 rounded-full transition-colors ${doc.isSensitive ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30' : 'text-slate-400 hover:text-amber-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                          className={`p-2 rounded-lg transition-all cursor-pointer ${doc.isSensitive ? 'text-amber-500 bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-400 hover:text-amber-500 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm'}`}
                           title={doc.isSensitive ? 'Remove protection' : 'Protect document'}
                         >
                           {doc.isSensitive ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
                         </button>
                         <button 
                           onClick={(e) => handleDelete(e, doc.id)}
-                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors"
+                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm rounded-lg transition-all cursor-pointer"
                           title="Delete document"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -497,30 +501,32 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
           onClick={() => setTagModalDocId(null)}
         >
           <div 
-            className="bg-white dark:bg-slate-900 rounded-xl shadow-xl w-full max-w-sm overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200"
+            className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col border border-slate-200/50 dark:border-slate-800/50 animate-in fade-in zoom-in-95 duration-200"
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800">
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Tag className="w-4 h-4 text-blue-500" />
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800/50">
+              <h2 className="text-sm font-black text-slate-900 dark:text-slate-100 flex items-center gap-2 font-display tracking-tight">
+                <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                  <Tag className="w-4 h-4 text-blue-500" />
+                </div>
                 Manage Tags
               </h2>
               <button 
                 onClick={() => setTagModalDocId(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
             
-            <div className="p-4 flex flex-col gap-4">
-              <div className="mb-2">
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Editing tags for:</p>
-                <p className="text-sm font-medium text-slate-900 dark:text-slate-200 truncate">{tagModalDoc.name}</p>
+            <div className="p-6 flex flex-col gap-6">
+              <div className="bg-slate-50 dark:bg-slate-800/30 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Editing tags for:</p>
+                <p className="text-sm font-semibold text-slate-900 dark:text-slate-200 truncate">{tagModalDoc.name}</p>
               </div>
 
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Preset Tags</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 font-mono">Preset Tags</h3>
                 <div className="flex flex-wrap gap-2">
                   {PRESET_TAGS.map(tag => {
                     const isSelected = (tagModalDoc.tags || []).includes(tag);
@@ -528,10 +534,10 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
                       <button
                         key={tag}
                         onClick={() => handleToggleTag(tagModalDoc.id, tag)}
-                        className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors border ${
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border cursor-pointer ${
                           isSelected 
-                            ? 'bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-800/60 dark:text-blue-300' 
-                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700'
+                            ? 'bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-800/60 dark:text-blue-300 shadow-sm' 
+                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 shadow-sm'
                         }`}
                       >
                         {tag}
@@ -541,15 +547,15 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Custom Tags</h3>
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800/50">
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 font-mono">Custom Tags</h3>
                 
-                <div className="flex flex-wrap gap-2 mb-3">
+                <div className="flex flex-wrap gap-2 mb-4">
                   {(tagModalDoc.tags || []).filter(t => !PRESET_TAGS.includes(t)).map(tag => (
                     <button
                       key={tag}
                       onClick={() => handleToggleTag(tagModalDoc.id, tag)}
-                      className="px-2.5 py-1 rounded-full text-xs font-medium transition-colors border bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-800/60 dark:text-blue-300 flex items-center gap-1 group"
+                      className="px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-800/60 dark:text-blue-300 flex items-center gap-1 group shadow-sm cursor-pointer"
                     >
                       {tag}
                       <X className="w-3 h-3 opacity-50 group-hover:opacity-100" />
@@ -564,12 +570,12 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
                     value={customTagInput}
                     onChange={(e) => setCustomTagInput(e.target.value)}
                     placeholder="Add a new tag..."
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg pl-3 pr-10 py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+                    className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-10 py-3 text-sm font-semibold text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm"
                   />
                   <button
                     type="submit"
                     disabled={!customTagInput.trim()}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 disabled:text-slate-400 p-1 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-md transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 disabled:text-slate-400 p-1.5 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -583,39 +589,41 @@ export function LibraryScreen({ onOpenPdf }: LibraryScreenProps) {
       {/* Notes Modal */}
       {notesModalDocId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]">
-            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-amber-500" />
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh] border border-slate-200/50 dark:border-slate-800/50">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800/50">
+              <h3 className="text-base font-black text-slate-900 dark:text-slate-100 flex items-center gap-2 font-display tracking-tight">
+                <div className="p-1.5 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
+                  <FileText className="w-5 h-5 text-amber-500" />
+                </div>
                 Document Notes
               </h3>
               <button 
                 onClick={() => setNotesModalDocId(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="p-4 flex-1 overflow-y-auto">
+            <div className="p-6 flex-1 overflow-y-auto">
               <textarea 
-                className="w-full h-48 sm:h-64 resize-none bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-amber-500/50 placeholder-slate-400 text-sm leading-relaxed"
+                className="w-full h-48 sm:h-64 resize-none bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl p-4 focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 placeholder-slate-400 text-sm leading-relaxed transition-all font-medium shadow-sm"
                 placeholder="Write your notes for this document here..."
                 value={notesInput}
                 onChange={e => setNotesInput(e.target.value)}
               />
             </div>
             
-            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
+            <div className="px-6 py-4 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-100 dark:border-slate-800/50 flex justify-end gap-3">
               <button 
                 onClick={() => setNotesModalDocId(null)}
-                className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                className="px-4 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleSaveNotes}
-                className="px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition-colors shadow-sm"
+                className="px-6 py-2.5 text-sm font-bold text-white bg-amber-600 hover:bg-amber-500 rounded-xl transition-all shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
               >
                 Save Notes
               </button>

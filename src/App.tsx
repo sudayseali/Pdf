@@ -228,7 +228,7 @@ export default function App() {
           rightAction={
             <button
               onClick={openSettings}
-              className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors active:scale-95"
+              className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer"
               title="Settings"
             >
               <Settings className="w-5 h-5" />

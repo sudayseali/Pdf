@@ -217,22 +217,22 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
     <div className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 h-full overflow-hidden relative">
       
       {/* HEADER BAR */}
-      <div className="px-4 py-3.5 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 shadow-sm z-10">
-        <div className="flex items-center gap-3">
+      <div className="px-6 py-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between shrink-0 shadow-sm z-10 sticky top-0">
+        <div className="flex items-center gap-4">
           <button 
             onClick={editingNote ? () => setEditingNote(null) : onBack}
-            className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400 active:scale-95"
+            className="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition-all duration-200 text-slate-600 dark:text-slate-400 active:scale-95 cursor-pointer shadow-sm border border-slate-200/50 dark:border-slate-700/50"
             title="Back"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-md font-bold text-slate-800 dark:text-white flex items-center gap-2">
-              <Notebook className="w-4 h-4 text-indigo-500" />
-              {editingNote ? 'Edit Note' : 'Modern Notepad'}
+            <h1 className="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2 font-display tracking-tight">
+              <Notebook className="w-5 h-5 text-indigo-500" />
+              {editingNote ? 'Edit Note' : 'Qoraallada (Notepad)'}
             </h1>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
-              {editingNote ? 'Edit your note or make changes' : 'Write down anything important'}
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black font-mono uppercase tracking-widest mt-0.5">
+              {editingNote ? 'Make changes' : 'Write down anything important'}
             </p>
           </div>
         </div>
@@ -240,10 +240,10 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
         {!editingNote && (
           <button
             onClick={handleCreateNewNote}
-            className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-all active:scale-95 shadow-md"
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-[1.25rem] transition-all duration-200 shadow-md hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>New Note</span>
+            <span className="hidden sm:inline">Qoraal Cusub (New)</span>
           </button>
         )}
       </div>
@@ -494,22 +494,22 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
           <div className="flex-1 flex flex-col h-full overflow-hidden">
             
             {/* Filter and Search Panel */}
-            <div className="p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 space-y-3 shrink-0">
+            <div className="p-4 sm:px-6 bg-slate-50 dark:bg-slate-950 border-b border-slate-200/50 dark:border-slate-800/50 space-y-3 shrink-0">
               
               {/* Search Field */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <div className="relative max-w-xl mx-auto w-full">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
                   placeholder="Search notes by title or content..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs focus:outline-none focus:border-indigo-500 text-slate-800 dark:text-slate-200 transition-colors"
+                  className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 text-slate-800 dark:text-slate-200 transition-all shadow-sm"
                 />
                 {searchQuery && (
                   <button 
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 p-1 rounded-full"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -517,17 +517,17 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
               </div>
 
               {/* Tags Horizontal Scroll Filter */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none shrink-0">
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none shrink-0 max-w-xl mx-auto w-full">
                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap uppercase tracking-wider">
                   Tags:
                 </span>
                 
                 <button
                   onClick={() => setSelectedTag(null)}
-                  className={`text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all whitespace-nowrap ${
+                  className={`text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all whitespace-nowrap cursor-pointer ${
                     selectedTag === null
-                      ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 shadow-sm'
                   }`}
                 >
                   All ({notes.length})
@@ -539,13 +539,13 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                     <button
                       key={tag}
                       onClick={() => setSelectedTag(tag)}
-                      className={`text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all whitespace-nowrap ${
+                      className={`text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all whitespace-nowrap cursor-pointer ${
                         selectedTag === tag
-                          ? 'bg-indigo-600 text-white shadow-sm'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 shadow-sm'
                       }`}
                     >
-                      {tag} ({count})
+                      {tag} <span className="opacity-70 font-normal">({count})</span>
                     </button>
                   );
                 })}
@@ -557,32 +557,32 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
             <div className="flex-1 p-4 overflow-y-auto bg-slate-50 dark:bg-slate-950">
               
               {sortedNotes.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
-                  <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center shadow-inner">
-                    <CheckSquare className="w-6 h-6 opacity-80 animate-pulse" />
+                <div className="flex flex-col items-center justify-center py-20 text-center space-y-5">
+                  <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 rounded-3xl flex items-center justify-center shadow-inner">
+                    <CheckSquare className="w-7 h-7 opacity-80 animate-pulse" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                    <h3 className="text-base font-black text-slate-800 dark:text-slate-200 font-display tracking-tight">
                       {searchQuery || selectedTag ? 'No results!' : 'No notes yet!'}
                     </h3>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 max-w-xs mx-auto">
+                    <p className="text-sm font-medium text-slate-400 dark:text-slate-500 mt-2 max-w-sm mx-auto">
                       {searchQuery || selectedTag 
-                        ? 'No notes match your selected filter. Please try a different search query.' 
-                        : 'You haven\'t written any notes yet. Click the button above to start a beautiful note!'}
+                        ? 'Wax qoraal ah oo la mid ah baaritaankaaga ma jiraan.' 
+                        : 'Weli wax qoraal ah ma aadan qorin. Guji badhanka sare si aad u bilowdo!'}
                     </p>
                   </div>
                   {!searchQuery && !selectedTag && (
                     <button
                       onClick={handleCreateNewNote}
-                      className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow active:scale-95 flex items-center gap-1.5"
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold px-5 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 flex items-center gap-2 cursor-pointer mt-4"
                     >
                       <Plus className="w-4 h-4" />
-                      Create your first note
+                      Qoraalkaaga ugu horeeya (First Note)
                     </button>
                   )}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {sortedNotes.map(note => {
                     const matchedColor = NOTE_COLORS.find(c => c.id === note.color) || NOTE_COLORS[0];
                     const noteFontObj = FONTS.find(f => f.id === note.fontFamily) || FONTS[0];
@@ -591,15 +591,15 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                       <div
                         key={note.id}
                         onClick={() => handleSelectNote(note)}
-                        className={`p-4 rounded-xl border flex flex-col justify-between cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 group relative overflow-hidden min-h-[140px] ${
+                        className={`p-5 sm:p-6 rounded-3xl border flex flex-col justify-between cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group relative overflow-hidden min-h-[160px] sm:min-h-[180px] ${
                           matchedColor.bg
                         } ${matchedColor.border}`}
                       >
                         
                         {/* Pinned Marker / Top Header */}
-                        <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex items-start justify-between gap-2 mb-3">
                           <h4 
-                            className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
+                            className="text-base font-black text-slate-900 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
                             style={{ 
                               fontFamily: noteFontObj.cssName,
                               color: noteColorObj.value || undefined

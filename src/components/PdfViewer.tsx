@@ -66,11 +66,6 @@ export const PdfViewer = memo(function PdfViewer({
     cMapPacked: true,
   }), []);
 
-  const fileConfig = useMemo(() => {
-    if (!fileData) return null;
-    return { data: new Uint8Array(fileData) };
-  }, [fileData]);
-
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
@@ -164,7 +159,7 @@ export const PdfViewer = memo(function PdfViewer({
     );
   }, [searchText]);
 
-  if (!fileConfig) return null;
+  if (!fileData) return null;
 
   // Calculate a responsive width with padding so the PDF doesn't stick to the edges
   const maxWidth = containerWidth - (sidebarOpen ? 320 : 0);
@@ -172,7 +167,7 @@ export const PdfViewer = memo(function PdfViewer({
   return (
     <div className="flex-1 flex overflow-hidden w-full h-full relative">
       <Document
-        file={fileConfig}
+        file={fileData}
         options={documentOptions}
         onLoadSuccess={(pdf) => {
           setNumPages(pdf.numPages);
@@ -243,6 +238,9 @@ export const PdfViewer = memo(function PdfViewer({
                 const pageNum = index + 1;
                 const pageW = maxWidth * zoom;
                 const pageH = pageHeights[pageNum] || (pageW * 1.414);
+                
+                // Virtualization: only render pages close to the current page to prevent UI freeze
+                const isNearViewport = Math.abs(pageNum - currentPage) <= 3;
 
                 return (
                   <div 
@@ -251,53 +249,65 @@ export const PdfViewer = memo(function PdfViewer({
                     className="relative overflow-hidden bg-white dark:bg-slate-900 shadow-md mb-6 rounded-md select-none border border-slate-200/10"
                     style={{ width: pageW, height: pageH }}
                   >
-                    <Page
-                      pageNumber={pageNum}
-                      width={pageW}
-                      className={`${(pageTheme === 'night' || invertColors) ? 'invert hue-rotate-180 brightness-95' : ''}`}
-                      renderTextLayer={true}
-                      renderAnnotationLayer={true}
-                      customTextRenderer={textRenderer}
-                      onLoadSuccess={(page) => {
-                        setPageHeights(prev => ({ ...prev, [pageNum]: page.height }));
-                      }}
-                      loading={
-                        <div className="w-full h-full bg-slate-200 dark:bg-slate-800 animate-pulse" />
-                      }
-                    />
-
-                    {/* Eye comfort overlays */}
-                    {pageTheme === 'sepia' && (
-                      <div className="absolute inset-0 bg-[#f4ecd8] mix-blend-multiply pointer-events-none z-20 rounded-md" />
-                    )}
-                    {pageTheme === 'eye-care' && (
-                      <div className="absolute inset-0 bg-[#e3f4e1] mix-blend-multiply pointer-events-none z-20 rounded-md" />
-                    )}
-
-                    {/* Samsung-style Drawing Overlay Canvas */}
-                    {pdfId && (
-                      <DrawingCanvas
-                        ref={(el) => {
-                          if (canvasRefs) {
-                            if (el) {
-                              canvasRefs.current[pageNum] = el;
-                            } else {
-                              delete canvasRefs.current[pageNum];
-                            }
+                    {isNearViewport ? (
+                      <>
+                        <Page
+                          pageNumber={pageNum}
+                          width={pageW}
+                          className={`${(pageTheme === 'night' || invertColors) ? 'invert hue-rotate-180 brightness-95' : ''}`}
+                          renderTextLayer={true}
+                          renderAnnotationLayer={true}
+                          customTextRenderer={textRenderer}
+                          onLoadSuccess={(page) => {
+                            // originalHeight & originalWidth exist on pdfjs.Page
+                            const originalHeight = page.originalHeight || page.height;
+                            const originalWidth = page.originalWidth || page.width || pageW;
+                            setPageHeights(prev => ({ ...prev, [pageNum]: originalHeight * (pageW / originalWidth) }));
+                          }}
+                          loading={
+                            <div className="w-full h-full bg-slate-200 dark:bg-slate-800 animate-pulse" />
                           }
-                        }}
-                        pdfId={pdfId}
-                        pageNumber={pageNum}
-                        width={pageW}
-                        height={pageH}
-                        isDrawingEnabled={drawingTool !== 'none'}
-                        currentTool={drawingTool}
-                        strokeColor={penColor}
-                        strokeWidth={penWidth}
-                        highlighterColor={highlighterColor}
-                        highlighterWidth={highlighterWidth}
-                        eraserWidth={eraserWidth}
-                      />
+                        />
+
+                        {/* Eye comfort overlays */}
+                        {pageTheme === 'sepia' && (
+                          <div className="absolute inset-0 bg-[#f4ecd8] mix-blend-multiply pointer-events-none z-20 rounded-md" />
+                        )}
+                        {pageTheme === 'eye-care' && (
+                          <div className="absolute inset-0 bg-[#e3f4e1] mix-blend-multiply pointer-events-none z-20 rounded-md" />
+                        )}
+
+                        {/* Samsung-style Drawing Overlay Canvas */}
+                        {pdfId && (
+                          <DrawingCanvas
+                            ref={(el) => {
+                              if (canvasRefs) {
+                                if (el) {
+                                  canvasRefs.current[pageNum] = el;
+                                } else {
+                                  delete canvasRefs.current[pageNum];
+                                }
+                              }
+                            }}
+                            pdfId={pdfId}
+                            pageNumber={pageNum}
+                            width={pageW}
+                            height={pageH}
+                            isDrawingEnabled={drawingTool !== 'none'}
+                            currentTool={drawingTool}
+                            strokeColor={penColor}
+                            strokeWidth={penWidth}
+                            highlighterColor={highlighterColor}
+                            highlighterWidth={highlighterWidth}
+                            eraserWidth={eraserWidth}
+                          />
+                        )}
+                      </>
+                    ) : (
+                      <div className="w-full h-full bg-slate-100 dark:bg-slate-800/50 flex flex-col items-center justify-center">
+                         <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin opacity-50 mb-2"></div>
+                         <span className="text-slate-400 font-mono text-xs">Page {pageNum}</span>
+                      </div>
                     )}
                   </div>
                 );
