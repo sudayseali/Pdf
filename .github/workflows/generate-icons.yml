@@ -1,0 +1,91 @@
+name: Generate Android Icons
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'icon-source/**'
+
+jobs:
+  generate-icons:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install pillow
+
+      - name: Generate Icons
+        run: |
+          python3 << 'EOF'
+          from PIL import Image, ImageDraw
+          import os
+          
+          # Create directories
+          dirs = [
+            'android/app/src/main/res/mipmap-ldpi',
+            'android/app/src/main/res/mipmap-mdpi',
+            'android/app/src/main/res/mipmap-hdpi',
+            'android/app/src/main/res/mipmap-xhdpi',
+            'android/app/src/main/res/mipmap-xxhdpi',
+            'android/app/src/main/res/mipmap-xxxhdpi',
+          ]
+          
+          for d in dirs:
+            os.makedirs(d, exist_ok=True)
+          
+          # Colors
+          color_bg = '#4285F4'  # Google Blue
+          
+          # Sizes
+          sizes = {
+            'mipmap-ldpi': 36,
+            'mipmap-mdpi': 48,
+            'mipmap-hdpi': 72,
+            'mipmap-xhdpi': 96,
+            'mipmap-xxhdpi': 144,
+            'mipmap-xxxhdpi': 192,
+          }
+          
+          # Generate icons
+          for density, size in sizes.items():
+            # Foreground (white PDF icon)
+            img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(img)
+            
+            # Draw blue background circle
+            margin = size // 8
+            draw.ellipse([margin, margin, size-margin, size-margin], fill=color_bg)
+            
+            # Draw white "PDF" text
+            text = 'PDF'
+            draw.text((size//2 - 8, size//2 - 6), text, fill='white', font=None)
+            
+            # Save files
+            foreground_path = f'android/app/src/main/res/{density}/ic_launcher_foreground.png'
+            round_path = f'android/app/src/main/res/{density}/ic_launcher_round.png'
+            
+            img.save(foreground_path)
+            img.save(round_path)
+            
+            print(f'✅ Generated {size}x{size} icons in {density}')
+          
+          print('✅ All icons generated successfully!')
+          EOF
+
+      - name: Commit and Push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add android/app/src/main/res/mipmap-*/*
+          git commit -m "Auto-generate Android app icons" || echo "No changes to commit"
+          git push
