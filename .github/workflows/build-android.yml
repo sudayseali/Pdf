@@ -63,15 +63,25 @@ jobs:
             exit 1
           fi
           
-          # Decode base64 robustly using Python to prevent any shell/encoding issues
+          # Decode base64 robustly using Python to prevent any shell/encoding/padding issues
           python3 -c "
 import os, base64
 keystore_b64 = os.environ.get('KEYSTORE_BASE64', '')
 if not keystore_b64.strip():
     print('Error: KEYSTORE_BASE64 env var is empty!')
     exit(1)
+# Remove all whitespace, newlines, and carriage returns
+keystore_b64 = ''.join(keystore_b64.split())
+# Fix padding if it is missing
+padding_needed = len(keystore_b64) % 4
+if padding_needed:
+    keystore_b64 += '=' * (4 - padding_needed)
+print(f'Base64 string length: {len(keystore_b64)}')
 try:
-    decoded = base64.b64decode(keystore_b64.strip())
+    decoded = base64.b64decode(keystore_b64)
+    print(f'Decoded size: {len(decoded)} bytes')
+    if len(decoded) < 100:
+        print('Warning: Decoded keystore is extremely small, it might be corrupt or incorrect!')
     os.makedirs('app', exist_ok=True)
     with open('app/release.keystore', 'wb') as f:
         f.write(decoded)
@@ -87,21 +97,18 @@ except Exception as e:
           echo "Verifying keystore creation..."
           ls -lh app/release.keystore
           
-          # Append signing configuration to gradle.properties for 100% robust and secure injection.
-          # This avoids any bash shell-escaping issues with passwords containing special characters (like $, !, etc.)
-          echo "Writing signing configuration to gradle.properties..."
-          echo "" >> gradle.properties
-          echo "android.injected.signing.store.file=$GITHUB_WORKSPACE/android/app/release.keystore" >> gradle.properties
-          echo "android.injected.signing.store.password=$STORE_PASSWORD" >> gradle.properties
-          echo "android.injected.signing.key.alias=$KEY_ALIAS" >> gradle.properties
-          echo "android.injected.signing.key.password=$KEY_PASSWORD" >> gradle.properties
+          echo "Checking environment variables (presence only, no values shown to keep them secure):"
+          if [ -n "$STORE_PASSWORD" ]; then echo "  STORE_PASSWORD is set (length: ${#STORE_PASSWORD})"; else echo "  STORE_PASSWORD is empty"; fi
+          if [ -n "$KEY_ALIAS" ]; then echo "  KEY_ALIAS is set (length: ${#KEY_ALIAS})"; else echo "  KEY_ALIAS is empty"; fi
+          if [ -n "$KEY_PASSWORD" ]; then echo "  KEY_PASSWORD is set (length: ${#KEY_PASSWORD})"; else echo "  KEY_PASSWORD is empty"; fi
           
           echo "Building release APK & AAB..."
           mkdir -p gradle/wrapper
           curl -L https://raw.githubusercontent.com/gradle/gradle/v8.14.3/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
           chmod +x gradlew
           
-          ./gradlew assembleRelease bundleRelease
+          # Clean build and compile
+          ./gradlew clean assembleRelease bundleRelease
 
       - name: Upload Release Artifacts
         uses: actions/upload-artifact@v4
