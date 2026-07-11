@@ -14,35 +14,44 @@ const flashcardStore = localforage.createInstance({ name: 'app_flashcards', stor
 export const storage = {
   // --- Library & File Management ---
   async savePdf(file: File): Promise<PdfDocument> {
-    const id = crypto.randomUUID();
-    const buffer = await file.arrayBuffer();
-    
-    await pdfStore.setItem(id, buffer);
-    
-    const doc: PdfDocument = {
-      id,
-      name: file.name,
-      size: file.size,
-      addedAt: Date.now(),
-      lastOpenedAt: Date.now(),
-    };
-    
-    const library = await this.getLibrary();
-    library.unshift(doc); // Add to top
-    await libraryStore.setItem('documents', library);
-    
-    // Default metadata
-    await metaStore.setItem(id, { lastPage: 1, bookmarks: [] });
-    
-    return doc;
+    try {
+      const id = crypto.randomUUID();
+      const buffer = await file.arrayBuffer();
+      
+      await pdfStore.setItem(id, buffer);
+      
+      const doc: PdfDocument = {
+        id,
+        name: file.name,
+        size: file.size,
+        addedAt: Date.now(),
+        lastOpenedAt: Date.now(),
+      };
+      
+      const library = await this.getLibrary();
+      library.unshift(doc); // Add to top
+      await libraryStore.setItem('documents', library);
+      
+      // Default metadata
+      await metaStore.setItem(id, { lastPage: 1, bookmarks: [] });
+      
+      return doc;
+    } catch (e) {
+      console.error("Failed to save PDF", e);
+      throw e;
+    }
   },
 
   async updateLastOpened(id: string) {
-    const library = await this.getLibrary();
-    const docIndex = library.findIndex(d => d.id === id);
-    if (docIndex !== -1) {
-      library[docIndex].lastOpenedAt = Date.now();
-      await libraryStore.setItem('documents', library);
+    try {
+      const library = await this.getLibrary();
+      const docIndex = library.findIndex(d => d.id === id);
+      if (docIndex !== -1) {
+        library[docIndex].lastOpenedAt = Date.now();
+        await libraryStore.setItem('documents', library);
+      }
+    } catch (e) {
+      console.error("Failed to update last opened", e);
     }
   },
 
@@ -74,12 +83,22 @@ export const storage = {
   },
 
   async getLibrary(): Promise<PdfDocument[]> {
-    const docs = await libraryStore.getItem<PdfDocument[]>('documents');
-    return docs || [];
+    try {
+      const docs = await libraryStore.getItem<PdfDocument[]>('documents');
+      return docs || [];
+    } catch (e) {
+      console.error("Failed to get library", e);
+      return [];
+    }
   },
 
   async getPdfData(id: string): Promise<ArrayBuffer | null> {
-    return await pdfStore.getItem<ArrayBuffer>(id);
+    try {
+      return await pdfStore.getItem<ArrayBuffer>(id);
+    } catch (e) {
+      console.error("Failed to get PDF data", e);
+      return null;
+    }
   },
 
   async deletePdf(id: string) {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Lock, Shield, Key, AlertCircle, Moon, Sun, Monitor, Settings, Database, Download, Upload, Flame, Clock, BookOpen, Check } from 'lucide-react';
+import { X, Lock, Shield, Key, AlertCircle, Moon, Sun, Monitor, Settings, Database, Share2, Upload, Flame, Clock, BookOpen, Check } from 'lucide-react';
 import { storage } from '../lib/storage';
 import { backupEngine } from '../lib/backup';
 import { AppState } from '../types';
@@ -76,21 +76,11 @@ export function SettingsModal({
           }
         } catch (err) {
           console.warn('Backup share failed or was canceled', err);
-          // Fallback to standard download
         }
+      } else {
+        setBackupMessage('Backup sharing not supported on this device.');
+        setTimeout(() => setBackupMessage(''), 3000);
       }
-
-      // Standard browser download fallback
-      const file = new Blob([jsonString], { type: 'application/json' });
-      const element = document.createElement("a");
-      element.href = URL.createObjectURL(file);
-      element.download = fileName;
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-      
-      setBackupMessage('Backup downloaded successfully!');
-      setTimeout(() => setBackupMessage(''), 3000);
     } catch (err) {
       console.error(err);
       setBackupMessage('Backup generation failed.');
@@ -454,10 +444,10 @@ export function SettingsModal({
                         className="p-4 text-left bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between transition-all hover:shadow-md hover:border-indigo-500/30 group"
                       >
                         <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl mb-3 inline-block group-hover:scale-110 transition-transform">
-                          <Download className="w-5 h-5 text-indigo-500" />
+                          <Share2 className="w-5 h-5 text-indigo-500" />
                         </div>
                         <div>
-                          <p className="text-sm font-black text-slate-800 dark:text-slate-200 font-display">Light Backup</p>
+                          <p className="text-sm font-black text-slate-800 dark:text-slate-200 font-display">Share Light Backup</p>
                           <p className="text-[10px] font-medium text-slate-500 mt-1 line-clamp-2">Notes, bookmarks & highlights only</p>
                         </div>
                       </button>
@@ -468,10 +458,10 @@ export function SettingsModal({
                         className="p-4 text-left bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between transition-all hover:shadow-md hover:border-emerald-500/30 group"
                       >
                         <div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl mb-3 inline-block group-hover:scale-110 transition-transform">
-                          <Download className="w-5 h-5 text-emerald-500" />
+                          <Share2 className="w-5 h-5 text-emerald-500" />
                         </div>
                         <div>
-                          <p className="text-sm font-black text-slate-800 dark:text-slate-200 font-display">Full Backup</p>
+                          <p className="text-sm font-black text-slate-800 dark:text-slate-200 font-display">Share Full Backup</p>
                           <p className="text-[10px] font-medium text-slate-500 mt-1 line-clamp-2">Includes all imported PDF files</p>
                         </div>
                       </button>

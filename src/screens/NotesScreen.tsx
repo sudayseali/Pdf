@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Search, Plus, Trash2, Pin, Tag, Calendar, Copy, Check, Download, 
+  Search, Plus, Trash2, Pin, Tag, Calendar, Copy, Check, Share2, 
   Palette, Edit3, X, ArrowLeft, Notebook, CheckSquare, Sparkles 
 } from 'lucide-react';
 import { storage } from '../lib/storage';
@@ -199,19 +199,10 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
         }
       } catch (err) {
         console.warn('Share failed or was canceled', err);
-        // Fallback to normal download
       }
+    } else {
+      showToast('Sharing not supported on this device.');
     }
-
-    // Standard browser download fallback
-    const element = document.createElement("a");
-    const file = new Blob([textContent], {type: 'text/plain'});
-    element.href = URL.createObjectURL(file);
-    element.download = fileName;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-    showToast('Downloaded as TXT file!');
   };
 
   // Tag Helpers in Editor
@@ -701,9 +692,9 @@ export function NotesScreen({ onBack }: NotesScreenProps) {
                             <button
                               onClick={(e) => handleExportAsTxt(note, e)}
                               className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                              title="Download TXT"
+                              title="Share TXT"
                             >
-                              <Download className="w-3.5 h-3.5" />
+                              <Share2 className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={(e) => handleDeleteNote(note.id, e)}

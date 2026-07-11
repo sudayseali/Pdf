@@ -12,24 +12,26 @@ const audioStore = localforage.createInstance({ name: 'pdf_audio_memos', storeNa
 const notesStore = localforage.createInstance({ name: 'app_notes', storeName: 'notes' });
 
 // Base64 helper functions
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  let binary = '';
-  const bytes = new Uint8Array(buffer);
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return window.btoa(binary);
+async function arrayBufferToBase64(buffer: ArrayBuffer): Promise<string> {
+  const blob = new Blob([buffer]);
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      // reader.result is a data URL (e.g. data:application/octet-stream;base64,.....)
+      const dataUrl = reader.result as string;
+      // Strip the prefix to just get the base64 part
+      const base64 = dataUrl.split(',')[1] || '';
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
-function base64ToArrayBuffer(base64: string): ArrayBuffer {
-  const binaryString = window.atob(base64);
-  const len = binaryString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return bytes.buffer;
+async function base64ToArrayBuffer(base64: string): Promise<ArrayBuffer> {
+  const dataUrl = `data:application/octet-stream;base64,${base64}`;
+  const res = await fetch(dataUrl);
+  return await res.arrayBuffer();
 }
 
 function blobToBase64(blob: Blob): Promise<string> {
@@ -124,7 +126,7 @@ export const backupEngine = {
       for (const id of pdfKeys) {
         const buffer = await pdfStore.getItem<ArrayBuffer>(id);
         if (buffer) {
-          pdfBlobs[id] = arrayBufferToBase64(buffer);
+          pdfBlobs[id] = await arrayBufferToBase64(buffer);
         }
       }
       backup.pdfBlobs = pdfBlobs;
@@ -207,7 +209,7 @@ export const backupEngine = {
       // Restore PDF Binaries
       if (backup.pdfBlobs) {
         for (const [id, b64] of Object.entries(backup.pdfBlobs)) {
-          const buffer = base64ToArrayBuffer(b64);
+          const buffer = await base64ToArrayBuffer(b64);
           await pdfStore.setItem(id, buffer);
         }
       }
